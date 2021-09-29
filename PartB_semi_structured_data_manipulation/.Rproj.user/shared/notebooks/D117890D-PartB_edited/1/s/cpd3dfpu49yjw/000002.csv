@@ -1,0 +1,3 @@
+"0","FINAL_DATA_NA_REMOVE %>%"
+"0","  group_by(Product = product) %>%"
+"0","  summarise(NumberOfRows = n())"

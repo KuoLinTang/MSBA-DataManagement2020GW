@@ -1,0 +1,330 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Data Management - Part B},
+  pdfauthor={Group 13},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+
+\title{Data Management - Part B}
+\author{Group 13}
+\date{2020/11/13}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\newpage
+
+\hypertarget{part-b}{%
+\section{Part B}\label{part-b}}
+
+\begin{itemize}
+\tightlist
+\item
+  Put the data in the unstructured format into a single file
+\item
+  Provide a dataset that contains information of products and their
+  values by country, year, and flow that can be used for further
+  analysis
+\item
+  Provide a high-level dataset description
+\end{itemize}
+
+\hypertarget{use-the-bash-command-unzip-to-get-the-originals-out}{%
+\subsection{\texorpdfstring{Use the \texttt{bash} command unzip to get
+the originals
+out}{Use the bash command unzip to get the originals out}}\label{use-the-bash-command-unzip-to-get-the-originals-out}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BuiltInTok{cd}\NormalTok{ Data_Management_Assignment }\CommentTok{# Data_Management_Assignment is the directory where the project is stores}
+\FunctionTok{unzip} \StringTok{"*.zip"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{build-a-function-that-takes-excel-files-as-input-and-merges-them-in-a-structured-data-frame}{%
+\subsection{Build a function that takes excel files as input and merges
+them in a structured data
+frame}\label{build-a-function-that-takes-excel-files-as-input-and-merges-them-in-a-structured-data-frame}}
+
+\begin{Shaded}
+\begin{Highlighting}[numbers=left,,]
+\NormalTok{DataFormation =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(file_path)\{}
+\NormalTok{  data =}\StringTok{ }\KeywordTok{read_excel}\NormalTok{(file_path)}
+  
+  \CommentTok{# Remove column 2 since it doesn't contain any values}
+\NormalTok{  data[,}\DecValTok{2}\NormalTok{] =}\StringTok{ }\OtherTok{NULL}
+  
+  \CommentTok{# The name of the flow is stored in the second row of column ...3}
+\NormalTok{  Flow =}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{...}\DecValTok{3}\NormalTok{[}\DecValTok{2}\NormalTok{]}
+  
+  \CommentTok{# The name of the country is stored in the fourth row of column ...3}
+\NormalTok{  Country =}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{...}\DecValTok{3}\NormalTok{[}\DecValTok{4}\NormalTok{]}
+  
+  \CommentTok{# Filter rows to only keep product and year information}
+\NormalTok{  data =}\StringTok{ }\NormalTok{data }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(...}\DecValTok{1} \OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Product"}\NormalTok{, }\DecValTok{1960}\OperatorTok{:}\DecValTok{2013}\NormalTok{)) }
+  
+  \CommentTok{# Replace ".." values with NA}
+\NormalTok{  data[data }\OperatorTok{==}\StringTok{ ".."}\NormalTok{] =}\StringTok{ }\OtherTok{NA}
+  
+  \CommentTok{# Rename the original columns and add two more columns - country and flow }
+\NormalTok{  data =}\StringTok{ }\NormalTok{data }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{row_to_names}\NormalTok{(}\DataTypeTok{row_number =} \DecValTok{1}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{rename}\NormalTok{(}\DataTypeTok{year =}\NormalTok{ Product) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{country =}\NormalTok{ Country, }\DataTypeTok{flow =}\NormalTok{ Flow)}
+  
+  \CommentTok{# Start gathering (pivoting data longer)}
+\NormalTok{  structured_data =}\StringTok{ }\NormalTok{data }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{gather}\NormalTok{(}\DataTypeTok{key =} \StringTok{"product"}\NormalTok{, }
+           \DataTypeTok{value =} \StringTok{"value"}\NormalTok{, }
+           \OperatorTok{-}\KeywordTok{c}\NormalTok{(}\StringTok{"country"}\NormalTok{, }\StringTok{"year"}\NormalTok{, }\StringTok{"flow"}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{arrange}\NormalTok{(year) }\OperatorTok{%>%}\StringTok{                             }
+\StringTok{    }\KeywordTok{select}\NormalTok{(country, year, flow, product, value)   }\CommentTok{# Reorder the order of columns}
+  
+\NormalTok{  structured_data}\OperatorTok{$}\NormalTok{value =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(structured_data}\OperatorTok{$}\NormalTok{value)}
+  
+  \KeywordTok{return}\NormalTok{(structured_data)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{apply-this-function-to-all-excel-files-in-the-directories}{%
+\subsection{Apply this function to all excel files in the
+directories}\label{apply-this-function-to-all-excel-files-in-the-directories}}
+
+\begin{Shaded}
+\begin{Highlighting}[numbers=left,,]
+\NormalTok{FINAL_structural_data =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{()  }\CommentTok{# Create an empty dataframe}
+
+\NormalTok{all_country_directories =}\StringTok{ }\KeywordTok{list.files}\NormalTok{(}\StringTok{"group_assignment/"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ (country }\ControlFlowTok{in}\NormalTok{ all_country_directories)\{}
+\NormalTok{  all_files =}\StringTok{ }\KeywordTok{list.files}\NormalTok{(}\KeywordTok{paste0}\NormalTok{(}\StringTok{"group_assignment/"}\NormalTok{, country, }\StringTok{"/"}\NormalTok{))}
+  \ControlFlowTok{for}\NormalTok{ (file }\ControlFlowTok{in}\NormalTok{ all_files)\{}
+\NormalTok{    file =}\StringTok{ }\KeywordTok{paste0}\NormalTok{(}\StringTok{"group_assignment/"}\NormalTok{, country, }\StringTok{"/"}\NormalTok{, file)}
+\NormalTok{    FINAL_structural_data =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(FINAL_structural_data, }\KeywordTok{DataFormation}\NormalTok{(file))}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{# Check if the structure is the same as the assignment description}
+\KeywordTok{head}\NormalTok{(FINAL_structural_data }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(country }\OperatorTok{==}\StringTok{ "Germany"}\NormalTok{, flow }\OperatorTok{==}\StringTok{ "Production"}\NormalTok{), }\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10 x 5
+##    country year  flow       product                        value
+##    <chr>   <chr> <chr>      <chr>                          <dbl>
+##  1 Germany 1960  Production Additives/blending components     NA
+##  2 Germany 1960  Production Anthracite                        NA
+##  3 Germany 1960  Production Aviation gasoline                  0
+##  4 Germany 1960  Production BKB                                0
+##  5 Germany 1960  Production Biodiesels                         0
+##  6 Germany 1960  Production Biogases                           0
+##  7 Germany 1960  Production Biogasoline                        0
+##  8 Germany 1960  Production Bitumen                            0
+##  9 Germany 1960  Production Blast furnace gas                  0
+## 10 Germany 1960  Production Brown coal (if no detail)     804180
+\end{verbatim}
+
+\hypertarget{remove-missing-values-if-there-is-no-observation-across-the-whole-period-and-flows-for-each-country-and-product}{%
+\subsection{Remove missing values if there is no observation across the
+whole period and flows for each country and
+product}\label{remove-missing-values-if-there-is-no-observation-across-the-whole-period-and-flows-for-each-country-and-product}}
+
+\hypertarget{our-assumption}{%
+\section{Our Assumption:}\label{our-assumption}}
+
+If the values for a specific country and product remain NA across the
+whole period and all flows, it can be assumed that there is no effective
+measure conducted to record this product in that country. So we remove
+records if there is no non-NA value across the whole period and flows
+for each product and country.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Get total number of missing values for each country and each product across years}
+\NormalTok{a =}\StringTok{ }\KeywordTok{aggregate}\NormalTok{(value }\OperatorTok{~}\StringTok{ }\NormalTok{country }\OperatorTok{+}\StringTok{ }\NormalTok{product, }\DataTypeTok{data=}\NormalTok{FINAL_structural_data, }\ControlFlowTok{function}\NormalTok{(x) \{}\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(x))\}, }\DataTypeTok{na.action =} \OtherTok{NULL}\NormalTok{)}
+
+\CommentTok{# Get total number of records for each country and each product across years}
+\NormalTok{b =}\StringTok{ }\NormalTok{FINAL_structural_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(country, product) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{n =} \KeywordTok{n}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `summarise()` regrouping output by 'country' (override with `.groups` argument)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Inner join the two data frame above to check if the number of records equals to the number of missing values under the same country and the same product}
+\NormalTok{c =}\StringTok{ }\KeywordTok{merge}\NormalTok{(a, b, }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"product"}\NormalTok{, }\StringTok{"country"}\NormalTok{), }\DataTypeTok{all =}\NormalTok{ T)}
+
+\CommentTok{# If number of missing value equals to number of records, then all records for a particular product in this country are missing (across years and flows) }
+\NormalTok{d =}\StringTok{ }\NormalTok{c[}\KeywordTok{which}\NormalTok{(c}\OperatorTok{$}\NormalTok{value }\OperatorTok{==}\StringTok{ }\NormalTok{c}\OperatorTok{$}\NormalTok{n), }\KeywordTok{c}\NormalTok{(}\StringTok{"country"}\NormalTok{, }\StringTok{"product"}\NormalTok{)]}
+
+\CommentTok{# Remove records if there is no non-NA value across the whole period and flows for each product and each country}
+\NormalTok{FINAL_DATA_NA_REMOVE =}\StringTok{ }\NormalTok{FINAL_structural_data}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(d))\{}
+\NormalTok{  FINAL_DATA_NA_REMOVE =}\StringTok{ }\NormalTok{FINAL_DATA_NA_REMOVE }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(country }\OperatorTok{!=}\StringTok{ }\NormalTok{d[i,}\DecValTok{1}\NormalTok{] }\OperatorTok{|}\StringTok{ }\NormalTok{product }\OperatorTok{!=}\StringTok{ }\NormalTok{d[i,}\DecValTok{2}\NormalTok{])}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{get-a-high-level-overview-of-the-newly-created-dataset}{%
+\subsection{Get a high-level overview of the newly created
+dataset}\label{get-a-high-level-overview-of-the-newly-created-dataset}}
+
+\begin{itemize}
+\tightlist
+\item
+  Output the total number of records
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[numbers=left,,]
+\KeywordTok{summarise}\NormalTok{(FINAL_DATA_NA_REMOVE, }\DataTypeTok{Dataset =} \StringTok{"Extended Energy Balances"}\NormalTok{, }\DataTypeTok{TotalNumberOfRows =} \KeywordTok{n}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 2
+##   Dataset                  TotalNumberOfRows
+##   <chr>                                <int>
+## 1 Extended Energy Balances            564430
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  Output the total number of records for each product across countries
+  across years
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[numbers=left,,]
+\NormalTok{FINAL_DATA_NA_REMOVE }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(}\DataTypeTok{Product =}\NormalTok{ product) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{NumberOfRows =} \KeywordTok{n}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 65 x 2
+##    Product                       NumberOfRows
+##    <chr>                                <int>
+##  1 Additives/blending components         8830
+##  2 Anthracite                            8830
+##  3 Aviation gasoline                     8830
+##  4 Biodiesels                            8830
+##  5 Biogases                              8830
+##  6 Biogasoline                           8830
+##  7 Bitumen                               8830
+##  8 BKB                                   8830
+##  9 Blast furnace gas                     8830
+## 10 Brown coal (if no detail)             7270
+## # ... with 55 more rows
+\end{verbatim}
+
+\end{document}

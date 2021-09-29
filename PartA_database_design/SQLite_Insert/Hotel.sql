@@ -1,0 +1,10 @@
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Service', 'Arendal', '4846', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Holdlamis', 'Menomonie', 'Oslo', '0760', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Gembucket', 'Helena', 'Bergen', '5007', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Matsoft', 'Cherokee', 'Kristiansand S', '4676', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', '7th', 'Bergen', '5072', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Pannier', 'Pankratz', 'Upton', 'WF9', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Trippledex', 'Onsgard', 'Trondheim', '7425', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', 'Gina', 'Aberdeen', 'AB39', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Andalax', 'Roth', 'Oslo', '0679', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Eggendart', 'Oslo', '0968', 'Norway');

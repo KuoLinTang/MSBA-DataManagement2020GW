@@ -1,0 +1,1029 @@
+---
+title: "Data Management - Part A"
+author: "Group 13"
+date: "2020/11/13"
+output:
+  word_document:
+    toc: yes
+    number_sections: yes
+  pdf_document:
+    toc: yes
+    number_sections: yes
+---
+\newpage
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part A
+
+## Create a database
+```{r defineconnection}
+# we will use the name of this variable to 
+# set up sql output in the rmd file
+my_connection <- RSQLite::dbConnect(RSQLite::SQLite(),"PartA_Hotel_Database.db")
+```
+
+* Before we start we can set a few options on the sqlite command line 
+```{sql, eval=FALSE, connection=my_connection}
+.headers on 
+.mode column 
+```
+
+
+## Specifying the tables with DDL Queries
+
+* Create tables for the database
+* Set up data types and key constraints
+* Assign AUTOINCREMENT to Primary Keys to generate unique numbers automatically 
+
+### Guest table
+
+* Information about each guest of all the hotels is tracked historically
+* Hotel guest is anyone who used any service at a hotel (either accommodation or additional services)
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Guests
+CREATE TABLE 'Guest'(
+  'GuestID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'FirstName' VARCHAR(30) NOT NULL,
+  'MiddleName' VARCHAR(30),
+  'LastName' VARCHAR(30) NOT NULL,
+  'StreetNumber' INTEGER,
+  'StreetName' VARCHAR(30) NOT NULL,
+  'City' VARCHAR(30) NOT NULL,
+  'State' VARCHAR(30),
+  'PostalCode' VARCHAR(10) NOT NULL,
+  'Country' VARCHAR(30) NOT NULL,
+  'Email' VARCHAR(100),
+  'HomePhone' INTEGER,
+  'WorkPhone' INTEGER,
+  'CellPhone' INTEGER
+);
+
+```
+
+### Hotel table
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Hotel
+CREATE TABLE 'Hotel'(
+  'HotelID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'HotelName' VARCHAR(30) NOT NULL,
+  'StreetNumber' INTEGER,
+  'StreetName' VARCHAR(30) NOT NULL,
+  'City' VARCHAR(30) NOT NULL,
+  'State' VARCHAR(30),
+  'PostalCode' VARCHAR(10) NOT NULL,
+  'Country' VARCHAR(30) NOT NULL,
+  'WebAddress' VARCHAR(100),
+  'PrimaryPhone' INTEGER
+);
+
+
+```
+
+### Channel Provider table
+
+* Channel Providers charge a booking fee for each reservation
+* This booking fee is fixed by channel provider and doesn't vary by hotel
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Channel Provider
+CREATE TABLE 'ChannelProvider'(
+  'ChannelProviderID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'ChannelProviderName' VARCHAR(30) NOT NULL,
+  'Website' VARCHAR(200),
+  'BookingFeeRate' DOUBLE NOT NULL
+);
+```
+
+### Room table
+
+* Room ID represents the room number
+* Floor 1-5 are considered to be Low
+* Floors > 5 are considered to be High
+* Room Rates are fixed in this database, the seasonal costs are handled by another software
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Room
+CREATE TABLE 'Room'(
+  'RoomID' VARCHAR(30),
+  'HotelID' INTEGER,
+  'Floor' INTEGER NOT NULL,
+  'HighOrLow' VARCHAR(10),
+  'NumberOfBeds' INTEGER DEFAULT 2,
+  'SmokingAllowed' BOOLEAN DEFAULT FALSE,
+  'RoomFee' INTEGER NOT NULL,
+PRIMARY KEY ('RoomID', 'HotelID'),
+FOREIGN KEY ('HotelID') 
+  REFERENCES Hotel('HotelID')
+);
+```
+
+### Service Table
+
+* The Service table stores accommodation as well as additional services
+* Additional services include phone charging equipment rental, the use of hotel facilities, etc.
+* The available hotel facilities vary based on the hotel
+* At the hotel restaurant and bar reservations are mandatory, no walk-ins allowed
+* Thus, all new guests should contact the hotel and leave their personal details first
+* Costs of items on the restaurant's and bar's menu as well as equipment and 
+  other hotel facilities rentals. Another software provides these costs to our database
+ 
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Service
+CREATE TABLE 'Service'(
+  'ServiceID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'ServiceName' VARCHAR(30) NOT NULL,
+  'HotelID' INTEGER NOT NULL,
+  FOREIGN KEY ('HotelID') 
+    REFERENCES Hotel('HotelID')
+);
+
+```
+
+### Reservation table
+
+* A guest might make multiple reservations
+* A guest receives a separate ReservationID for each additional room he/she books
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Reservation
+CREATE TABLE 'Reservation'(
+  'ReservationID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'HotelID' INTEGER NOT NULL,
+  'GuestID' INTEGER NOT NULL,
+  'RoomID' VARCHAR(30) NOT NULL,
+  'ChannelProviderID' INTEGER,
+  'CreditCardNumber' INTEGER NOT NULL,
+  'CardExpireYear' INTEGER NOT NULL,
+  'CardExpireMonth' INTEGER NOT NULL,
+  'DateFrom' DATE NOT NULL,
+  'DateTo' DATE NOT NULL,
+  'SmokingPreference' BOOLEAN DEFAULT FALSE,
+  'NumberOfBeds' INTEGER,
+  'NumberOfGuests' INTEGER,
+  FOREIGN KEY ('GuestID') 
+    REFERENCES Guest('GuestID'),
+  FOREIGN KEY ('RoomID','HotelID') 
+    REFERENCES Room('RoomID','HotelID'),
+  FOREIGN KEY ('ChannelProviderID') 
+    REFERENCES ChannelProvider('ChannelProviderID'),
+  CHECK(CreditCardNumber BETWEEN 0 AND 9999999999999999),
+  CHECK(CardExpireYear BETWEEN 20 AND 50),
+  CHECK(CardExpireMonth BETWEEN 1 AND 12)
+);
+
+```
+
+### Past Reservation table
+
+* Reservation is removed from the Reservation table after it has been used
+* It is considered used when either a guests check in or cancels his/her reservation
+* Information on these reservations is stored in the Past Reservation table
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Past Reservations
+CREATE TABLE 'PastReservation'(
+  'PastReservationID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'HotelID' INTEGER NOT NULL,
+  'GuestID' INTEGER NOT NULL,
+  'RoomID' VARCHAR(30) NOT NULL,
+  'DateFrom' DATE NOT NULL,
+  'DateTo' DATE NOT NULL, 
+  'PastReservationStatus' VARCHAR(20) NOT NULL,
+  'ChannelProviderID' INTEGER,
+  FOREIGN KEY ('GuestID') 
+    REFERENCES Guest('GuestID'),
+  FOREIGN KEY ('RoomID','HotelID') 
+    REFERENCES Room('RoomID','HotelID'),
+  FOREIGN KEY ('ChannelProviderID') 
+    REFERENCES ChannelProvider('ChannelProviderID')
+);
+
+
+
+```
+
+### Room Status table
+
+* Tracks the rooms status across all hotels
+* The information in this table is used to calculate Number Of Available Rooms for Channel Providers
+* Each hotel provider requires at least two rooms to be available for booking at any time
+* We are tracking number of rooms available at each hotel daily since the current date and onward
+* Available rooms are all rooms which are not reserved during a specific period of time
+* Another software processes the information in the given table and sends it to the channel providers
+* On a provider's website, when a user is searching for a room during a specific period 
+  and if there are less than 2 rooms available for booking at a particular hotel,
+  this hotel is not displayed in the search results on the provider's website. 
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Room Status
+CREATE TABLE 'RoomStatus'(
+  'RoomStatusID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'RoomStatus' BOOLEAN DEFAULT TRUE,
+  'RoomID' VARCHAR(30) NOT NULL,
+  'HotelID' INTEGER NOT NULL,
+  'rsDate' DATE NOT NULL,
+  'ReservationID' INTEGER,
+  'PastReservationID' INTEGER,
+  FOREIGN KEY ('RoomID', 'HotelID') 
+    REFERENCES Room('RoomID', 'HotelID'),
+  FOREIGN KEY ('PastReservationID')
+    REFERENCES PastReservation('PastReservationID'),
+  FOREIGN KEY ('ReservationID')
+    REFERENCES Reservation('ReservationID')
+  UNIQUE(HotelID, RoomID, rsDate)
+);
+
+```
+
+
+### Invoice table
+
+* An invoice is considered paid if outstanding amount is £0.00
+* PaidFlag shows whether an invoice was paid in full (PaidFlag = TRUE/FALSE)
+* DateFrom indicates the date when the first charge was made for a particular stay
+* InvoiceCheckOutTime is assigned when all charges are paid in full by a guest and after he/she checks out
+* Amount Outstanding is updated immediately right after any payment or charge is issued
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Invoice
+CREATE TABLE 'Invoice'(
+  'InvoiceID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'GuestID' INTEGER NOT NULL,
+  'AmountOutstanding' INTEGER,
+  'PaidFlag' BOOLEAN DEFAULT FALSE,
+  'DateFrom' DATETIME NOT NULL,
+  'InvoiceCheckOutTime' DATETIME,
+  FOREIGN KEY ('GuestID') 
+    REFERENCES Guest('GuestID')
+);
+```
+
+### Charge table
+
+* A guest can book a room and use additional services provided by a hotel
+* Accommodation fees as well as additional costs are stored as Charges
+* Charges are reflected by each guest during his/her particular stay 
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Charge
+CREATE TABLE 'Charge'(
+  'ChargeID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'GuestID' INTEGER NOT NULL,
+  'ServiceID' INTEGER NOT NULL,
+  'InvoiceID' INTEGER,
+  'ChargeAmount' INTEGER NOT NULL,
+  'ChargeTime' DATETIME NOT NULL,
+  FOREIGN KEY ('GuestID') 
+    REFERENCES Guest('GuestID'),
+  FOREIGN KEY ('ServiceID') 
+    REFERENCES Service('ServiceID'),
+  FOREIGN KEY ('InvoiceID') 
+    REFERENCES Invoice('InvoiceID')
+);
+
+INVERT
+```
+
+### Payment table
+
+* A guest may pay his/her bill at any given time during a particular stay
+* A guest might make multiple payments of any amounts
+* A wide variety of payment types are accepted (credit card. check, cash, etc) 
+* Different payment types are stored as PaymentType 
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Payment
+CREATE TABLE 'Payment'(
+  'PaymentID' INTEGER PRIMARY KEY AUTOINCREMENT,
+  'GuestID' INTEGER NOT NULL,
+  'HotelID' INTEGER NOT NULL,
+  'InvoiceID' INTEGER,
+  'PayAmount' INTEGER NOT NULL,
+  'PaymentType' VARCHAR(30),
+  'PayTime' DATETIME NOT NULL,
+  FOREIGN KEY ('GuestID') 
+    REFERENCES Guest('GuestID'),
+  FOREIGN KEY ('HotelID') 
+    REFERENCES Hotel('HotelID'),
+  FOREIGN KEY ('InvoiceID') 
+    REFERENCES Invoice('InvoiceID')
+);
+```
+
+
+## A set of scenarios with SQL queries to describe the information flow in the database
+
+### Room Availability
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Show a list of rooms available in specific the hotel during Dec 12-15, 2020
+SELECT
+    DISTINCT(rs.RoomID)
+  , Room.Floor
+	, Room.NumberOfBeds
+	, Room.SmokingAllowed
+FROM RoomStatus AS rs
+INNER JOIN Room USING(RoomID, HotelID)
+WHERE Room.HotelID = 5
+AND rs.RoomStatus = TRUE  -- True means AVAILABLE
+AND (rs.rsDate >= '2020-12-12' AND rs.rsDate < '2020-12-15');
+```
+
+### Reservations
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- The check-in process
+-- First Reservation
+INSERT INTO PastReservation 
+(HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "Checked-in", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 1;
+
+DELETE FROM Reservation
+WHERE ReservationID = 1;
+
+
+-- Second Reservation (Optional)
+INSERT INTO PastReservation 
+(HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "Checked-in", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 2;
+
+DELETE FROM Reservation
+WHERE ReservationID = 2;
+
+
+
+-- The cancellation process. Use ReservationID to specify a reservation to be canceled
+INSERT INTO PastReservation 
+(HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "Canceled", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 3;
+
+DELETE FROM Reservation
+WHERE ReservationID = 3;
+
+
+
+-- The cancellation process within 24 hours before check-in. (Guests are still charged for room fees and the past reservation status will be specified as "Missed")
+INSERT INTO PastReservation 
+(HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "Missed", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 4;
+
+DELETE FROM Reservation
+WHERE ReservationID = 4;
+
+```
+
+
+### Daily update data in RoomStatus
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- We record every status of rooms in a year
+-- Every day We have to update the room status
+-- We delete today's room status data because 
+DELETE FROM RoomStatus
+WHERE rsDate = Date("now", "-1 day")
+
+
+-- In order to track room status for a whole year, we will also add new data for the day one year from today
+INSERT INTO RoomStatus
+(RoomID, HotelID, rsDate, ReservationID, PastReservationID)
+SELECT RoomID, HotelID, Date("now", "+1 year", "-1 day"), NULL, NULL
+FROM Room 
+
+-- Check reservation table and pastreservation table and update Room Status table
+UPDATE RoomStatus
+SET RoomStatus = (
+    SELECT 
+    CASE 
+    WHEN EXISTS(
+        SELECT HotelID, RoomID
+  	    FROM Reservation
+  	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+  	        AND Reservation.HotelID = RoomStatus.HotelID
+  	        AND Reservation.RoomID = RoomStatus.RoomID)
+  	    OR
+  	    EXISTS(
+        SELECT HotelID, RoomID
+  	    FROM PastReservation
+  	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+  	        AND PastReservation.HotelID = RoomStatus.HotelID
+  	        AND PastReservation.RoomID = RoomStatus.RoomID
+  	        AND PastReservation.PastReservationStatus = "Checked-in") THEN FALSE
+  	ELSE TRUE
+  	END
+  	),
+  	
+  	ReservationID = (
+  	CASE 
+    WHEN EXISTS(
+        SELECT HotelID, RoomID
+  	    FROM Reservation
+  	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+  	        AND Reservation.HotelID = RoomStatus.HotelID
+  	        AND Reservation.RoomID = RoomStatus.RoomID
+    ) THEN (SELECT ReservationID
+  	          FROM Reservation
+        	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+        	        AND Reservation.HotelID = RoomStatus.HotelID
+        	        AND Reservation.RoomID = RoomStatus.RoomID)
+    ELSE NULL
+    END
+    ),
+  	
+  	PastReservationID = (
+  	CASE 
+    WHEN EXISTS(
+        SELECT HotelID, RoomID
+  	    FROM PastReservation
+  	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+  	        AND PastReservation.HotelID = RoomStatus.HotelID
+  	        AND PastReservation.RoomID = RoomStatus.RoomID
+    ) THEN (SELECT PastReservationID
+  	          FROM PastReservation
+        	    WHERE DateFrom <= rsDate AND rsDate < DateTo 
+        	        AND PastReservation.HotelID = RoomStatus.HotelID
+        	        AND PastReservation.RoomID = RoomStatus.RoomID
+        	        AND PastReservationStatus = "Checked-in")
+    ELSE NULL
+    END
+    )
+
+```
+
+
+### Checking in
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Generate the invoice for this stay while checking in using GuestID and ReservationIDs
+-- If the guest has booked multiple rooms, he should get multiple reservationIDs when he has completed reservation. 
+-- In this example, the guest reserved two rooms and got reservationID = 1 and 2.
+-- Calculate the total room fee and get an Invoice ID 1
+INSERT INTO Invoice
+(GuestID, AmountOutstanding, PaidFlag, DateFrom, InvoiceCheckOutTime)
+SELECT GuestID, SUM(RoomFee) AS Total_Room_Fee, FALSE, DateFrom, NULL
+FROM (
+  SELECT 
+      res.GuestID
+    , ((JULIANDAY(res.DateTo)-JULIANDAY(res.DateFrom))*room.RoomFee) AS RoomFee
+    , res.DateFrom
+  FROM Reservation AS res
+  INNER JOIN Room AS room USING(RoomID, HotelID)
+  WHERE res.ReservationID = 1 OR res.ReservationID = 2
+  )
+GROUP BY GuestID;
+
+-- Charge accommodation fees for this stay while checking in with InvoiceID
+INSERT INTO Charge (GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+SELECT GuestID, ServiceID, InvoiceID, AmountOutstanding, DATETIME('now')
+FROM Invoice, Service
+WHERE InvoiceID = 1
+  AND ServiceName = "Accommodation" 
+  AND HotelID = 5;
+```
+
+### During the stay in a hotel
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Paying the accommodation fees
+INSERT INTO Payment (GuestID, HotelID, InvoiceID, PayAmount, PaymentType, PayTime)
+VALUES (1, 5, 1, 4500, "Cash", DATETIME('now'));
+
+UPDATE Invoice
+SET
+  AmountOutstanding = (
+    SELECT SUM(Total_Amount) AS AmountOutstanding
+    FROM
+    (
+      SELECT InvoiceID, SUM(-PayAmount) AS Total_Amount
+      FROM Payment
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+      
+      UNION 
+      
+      SELECT InvoiceID, SUM(ChargeAmount) AS Total_Amount
+      FROM Charge
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+    )
+  )
+WHERE InvoiceID = 1;
+
+
+-- New charge at the restaurant
+INSERT INTO Charge (GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+SELECT 1, ServiceID, 17, 50, DATETIME('now') 
+FROM Service 
+WHERE HotelID = 5 AND ServiceName = "Restaurant";
+
+UPDATE Invoice
+SET
+  AmountOutstanding = (
+    SELECT SUM(Total_Amount) AS AmountOutstanding
+    FROM
+    (
+      SELECT InvoiceID, SUM(-PayAmount) AS Total_Amount
+      FROM Payment
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+      
+      UNION 
+      
+      SELECT InvoiceID, SUM(ChargeAmount) AS Total_Amount
+      FROM Charge
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+    )
+  )
+WHERE InvoiceID = 1;
+```
+
+### Check Out
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Check if Amount Outstanding of invoice #17 is £0.00
+SELECT 
+    g.FirstName
+  , g.LastName
+  , i.AmountOutstanding
+  , i.PaidFlag
+  , i.DateFrom
+  , i.InvoiceCheckOutTime
+FROM Invoice AS i
+INNER JOIN Guest AS g 
+ON i.GuestID = g.GuestID
+WHERE InvoiceID = 17;
+
+
+-- If yes, set the PaidFlag of invoice to TRUE and check out the invoice
+UPDATE Invoice
+SET InvoiceCheckOutTime = DATE('now'), PaidFlag = TRUE
+WHERE InvoiceID = 17;
+
+
+-- Otherwise, request the guest to pay the outstanding amount and check out the invoice
+INSERT INTO Payment (GuestID, HotelID, InvoiceID, PayAmount, PaymentType, PayTime)
+VALUES (1, 5, 1, 3190, "Credit Card", DATETIME('now'));
+
+
+
+
+-- Update outstanding amount, set the PaidFlag of invoice to TRUE and check out the invoice
+UPDATE Invoice
+SET
+  AmountOutstanding = (
+    SELECT SUM(Total_Amount) AS AmountOutstanding
+    FROM
+    (
+      SELECT InvoiceID, SUM(-PayAmount) AS Total_Amount
+      FROM Payment
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+      
+      UNION 
+      
+      SELECT InvoiceID, SUM(ChargeAmount) AS Total_Amount
+      FROM Charge
+      WHERE InvoiceID = 1
+      GROUP BY InvoiceID
+    )
+  ),
+  InvoiceCheckOutTime = DATE('now'), 
+  PaidFlag = TRUE
+WHERE InvoiceID = 1;
+
+
+
+-- Check the invoice which lists all events
+SELECT 
+	  'Charge' AS EventType
+	, ServiceName AS Event
+	, ChargeAmount AS Amount
+	, ChargeTime AS EventTime
+FROM Charge INNER JOIN Service USING (ServiceID)
+WHERE InvoiceID = 1
+
+UNION
+
+SELECT 
+	  'Payment'
+	, PaymentType
+	, -PayAmount
+	, PayTime
+FROM Payment
+WHERE InvoiceID = 1
+
+UNION
+
+SELECT 
+	  ''
+	, 'Total Balance'
+	, AmountOutstanding
+	, DATETIME('now')
+FROM Invoice		
+WHERE InvoiceID = 1
+ORDER BY EventTime;
+```
+
+
+## A set of scenarios with SQL queries that satisfy the business goals
+
+### The total spend by customer for a particular stay
+
+* The amount spent by customer during each stay is reflected in an invoice
+* A guest would have only one invoice that correspond to each stay 
+* An invoice is released when the amount outstanding is paid in full AND after a guest checks out
+* Display the total amount spend by customer whose GuestID = 1 and InvoiceID = 1
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+SELECT 
+	  c.GuestID
+	, c.InvoiceID
+	, SUM(c.ChargeAmount) AS TotalAmount
+	, i.PaidFlag
+	, i.InvoiceCheckOutTime AS InvoicePrinted
+FROM Charge AS c
+INNER JOIN Invoice AS i
+USING (InvoiceID)
+WHERE i.InvoiceCheckOutTime IS NOT NULL
+  AND c.InvoiceID = 1
+GROUP BY c.InvoiceID
+```
+
+### The most valuable customers
+
+* The most valuable customers are defined as the highest paying customers in a specific period of time
+* Payments by customer and date information are stored in the PAYMENT table
+* Pull the top 10 most valuable customers by the specified period
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- in the last two months (excluding the current month)
+SELECT 
+    Guest.GuestID
+  , Guest.FirstName
+  , Guest.LastName
+  , SUM(Payment.PayAmount) AS TotalValue
+  , DATE('now','start of month', '-2 month') AS DateFrom
+  , DATE('now', 'start of month', '-1 day') AS DateTo
+FROM Payment 
+INNER JOIN Guest
+USING (GuestID)
+WHERE Payment.PayTime BETWEEN DATE('now','start of month', '-2 month')
+                  AND DATE('now', 'start of month', '-1 day')
+GROUP BY Guest.GuestID
+ORDER BY TotalValue DESC
+LIMIT 10;
+
+
+-- in the past year
+SELECT 
+    Guest.GuestID
+  , Guest.FirstName
+  , Guest.LastName
+  , SUM(Payment.PayAmount) AS TotalValue
+  , DATE('now','start of year', '-1 year') AS DateFrom
+  , DATE('now', 'start of year', '-1 day') AS DateTo
+FROM Payment 
+INNER JOIN Guest
+USING (GuestID)
+WHERE Payment.PayTime BETWEEN DATE('now','start of year', '-1 year')
+                  AND DATE('now', 'start of year', '-1 day')
+GROUP BY Guest.GuestID
+ORDER BY TotalValue DESC
+LIMIT 10;
+
+
+-- from the beginning of the records (excluding the current date)
+SELECT 
+    p.GuestID
+  , g.FirstName
+  , g.LastName
+  , SUM(p.PayAmount) AS TotalValue
+  , DATE('now', '-1 day') AS DateTo
+FROM Payment AS p
+INNER JOIN Guest AS g
+USING (GuestID) 
+WHERE p.PayTime < DATE('now', '-1 day')
+GROUP BY p.GuestID
+ORDER BY TotalValue DESC
+LIMIT 10;
+
+```
+
+### Which are the top countries where our customers come from
+
+* Pull top 10 countries by the total number of guests
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+SELECT 
+    Country
+  , COUNT(GuestID) AS NumberOfGuests
+FROM Guest
+GROUP BY Country
+ORDER BY COUNT(GuestID) DESC
+LIMIT 10
+```
+
+### How much did the hotel pay in referral fees for each of the platforms
+
+* Each channel provider charges a booking fee for each reservation
+* A set percentage is paid on each reservation made through each platform
+* The booking fee is payable at the end of each month
+* It is charged only when a reservation has been used (not canceled)
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Create a view that combines Channel Provider and Room Bookings information
+CREATE VIEW IF NOT EXISTS PastReservationByChannel
+AS
+SELECT
+		  prc.*
+		, r.RoomFee
+FROM
+	(SELECT
+		  cp.ChannelProviderName
+		, cp.BookingFeeRate
+		, pr.HotelID
+		, pr.RoomID
+		, JulianDay(pr.DateTo)-Julianday(pr.DateFrom) AS DaysBooked
+		, pr.PastReservationStatus
+	FROM PastReservation AS pr
+	LEFT JOIN ChannelProvider AS cp
+	ON pr.ChannelProviderID = cp.ChannelProviderID
+	WHERE pr.PastReservationStatus IN ('Checked-in','Missed')
+	AND pr.DateTo < DATE('now', 'start of month', '-1 day')) AS prc
+LEFT JOIN Room AS r
+ON prc.HotelID = r.HotelID
+AND prc.RoomID = r.RoomID
+
+-- Calculate referral fees by hotel for each channel provider
+
+SELECT
+	  HotelID
+	, ChannelProviderName
+	, SUM(BookingFeeRate*RoomFee*DaysBooked) AS ReferralFee
+FROM PastReservationByChannelProvider
+GROUP BY HotelID, ChannelProviderName
+
+```
+
+### The utilization rate for each hotel in the last 12 months
+
+* Calculate the average utilization of room bookings in each hotel
+* The number of days of stays for a room represents the number of billable days
+* Therefore, the average billable days of each hotel is the mean of the number 
+  of billable days for all rooms in that hotel
+* In the last 12 month excluding the current month
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+SELECT 
+    t2.HotelID
+  , AVG(t2.TotalBillableDays) AS AvgBillableDays	
+FROM
+	( SELECT 
+		  t1.HotelID
+		, t1.RoomID
+		, SUM(t1.billable_day) AS TotalBillableDays
+	FROM
+		( SELECT 
+			  h.HotelID
+			, pr.RoomID
+			, CASE WHEN pr.DateFrom < DATE('now', 'start of month', '-12 month') 
+				   THEN JulianDay(pr.DateTo)-Julianday(DATE('now', 'start of month', '-12 month'))
+				   ELSE JulianDay(pr.DateTo)-Julianday(pr.DateFrom)
+				   END billable_day
+		FROM PastReservation AS pr
+		NATURAL JOIN Hotel AS h
+		WHERE DATE(pr.DateTo, '-1 day') >= DATE('now', 'start of month', '-12 month') 
+			  AND pr.PastReservationStatus = 'Checked-in' ) AS t1
+	GROUP BY t1.HotelID, t1.RoomID ) AS t2
+GROUP BY t2.HotelID
+```
+
+### Customer Value in terms of total spent for each customer before the current booking
+
+* The current booking means that a guest's invoice has not been released yet 
+* So, InvoiceCheckOutTime is NULL for the current bookings
+* Calculate LTV by each customer based on total payments with invoice closed
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+SELECT 
+    i.GuestID
+  , g.FirstName
+  , g.LastName
+  , SUM(p.PayAmount) AS TotalSpend
+FROM Invoice  AS i
+INNER JOIN Payment AS p 
+USING (InvoiceID)
+INNER JOIN Guest AS g
+USING (GuestID)
+WHERE i.InvoiceCheckOutTime IS NOT NULL
+GROUP BY i.GuestID
+```
+
+
+
+```{r disconnection}
+RSQLite::dbDisconnect(my_connection)
+```
+
+
+
+```{sql, eval=FALSE, attr.source='.numberLines', connection=my_connection}
+-- Insert guests
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Denice', 'Jann', 'Tennessee', 'Oslo', '0194', 'Norway');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Vaclav', 'Gillanders', '1st', 'Molde', '6405', 'Norway');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Stanford', 'Sidnell', 'Mcguire', 'Skien', '3741', 'Norway');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Rab', 'Penreth', 'Transport', 'Gustavsberg', '134 40', 'Sweden');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Selena', 'Hazeldene', 'Eagle Crest', 'Kaskinen', '64260', 'Finland');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Rubie', 'Quartermaine', 'Miller', 'Svedala', '233 94', 'Sweden');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Bobbi', 'Domonkos', 'Westport', 'Gnosja', '335 24', 'Sweden');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Latrina', 'Gownge', 'Garrison', 'Kumla', '692 91', 'Sweden');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Jonathan', 'Allanby', 'Oriole', 'Skinnskatteberg', '739 30', 'Sweden');
+insert into Guest (FirstName, LastName, StreetName, City, PostalCode, Country) values ('Johna', 'Angrove', 'Boyd', 'Stockholm', '102 52', 'Sweden');
+
+
+-- Insert Hotels
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Service', 'Arendal', '4846', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Holdlamis', 'Menomonie', 'Oslo', '0760', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Gembucket', 'Helena', 'Bergen', '5007', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Matsoft', 'Cherokee', 'Kristiansand S', '4676', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', '7th', 'Bergen', '5072', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Pannier', 'Pankratz', 'Upton', 'WF9', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Trippledex', 'Onsgard', 'Trondheim', '7425', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', 'Gina', 'Aberdeen', 'AB39', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Andalax', 'Roth', 'Oslo', '0679', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Eggendart', 'Oslo', '0968', 'Norway');
+
+
+-- Insert Channel Providers
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Service', 'Arendal', '4846', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Holdlamis', 'Menomonie', 'Oslo', '0760', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Gembucket', 'Helena', 'Bergen', '5007', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Matsoft', 'Cherokee', 'Kristiansand S', '4676', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', '7th', 'Bergen', '5072', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Pannier', 'Pankratz', 'Upton', 'WF9', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Trippledex', 'Onsgard', 'Trondheim', '7425', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Solarbreeze', 'Gina', 'Aberdeen', 'AB39', 'United Kingdom');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Andalax', 'Roth', 'Oslo', '0679', 'Norway');
+insert into Hotel (HotelName, StreetName, City, PostalCode, Country) values ('Lotlux', 'Eggendart', 'Oslo', '0968', 'Norway');
+
+
+-- Insert rooms
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (1, 1, 6, 'High', 2, false, 300);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (2, 1, 7, 'High', 2, false, 148);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (3, 1, 8, 'High', 2, true, 112);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (4, 1, 10, 'High', 2, true, 155);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (5, 1, 2, 'Low', 2, false, 233);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (6, 1, 1, 'Low', 2, false, 211);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (7, 1, 4, 'Low', 2, false, 65);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (8, 1, 3, 'Low', 2, false, 238);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (9, 1, 8, 'High', 2, false, 94);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (10, 1, 1, 'Low', 2, false, 176);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (1, 2, 10, 'High', 2, true, 272);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (2, 2, 4, 'Low', 2, true, 20);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (3, 2, 7, 'High', 2, false, 60);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (4, 2, 2, 'Low', 2, false, 232);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (5, 2, 8, 'High', 2, true, 289);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (6, 2, 5, 'Low', 2, true, 257);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (7, 2, 6, 'High', 2, true, 163);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (8, 2, 3, 'Low', 2, false, 142);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (9, 2, 7, 'High', 2, false, 159);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (10, 2, 9, 'High', 2, false, 283);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (1, 3, 6, 'High', 2, true, 125);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (2, 3, 10, 'High', 2, true, 259);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (3, 3, 5, 'Low', 2, false, 164);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (4, 3, 6, 'High', 2, true, 47);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (5, 3, 6, 'High', 2, true, 76);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (6, 3, 3, 'Low', 2, false, 201);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (7, 3, 8, 'High', 2, false, 108);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (8, 3, 8, 'High', 2, true, 195);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (9, 3, 1, 'Low', 2, false, 233);
+insert into Room (RoomID, HotelID, Floor, HighOrLow, NumberOfBeds, SmokingAllowed, RoomFee) values (10, 3, 6, 'High', 2, true, 114);
+
+
+-- Insert service data in Service table
+INSERT INTO Service (ServiceName, HotelID)
+VALUES("Accommodation", 1),("Accommodation", 2),("Accommodation",3),("Accommodation", 4),("Accommodation", 5),
+("Breakfast", 1),("Breakfast", 2),("Breakfast", 3),("Breakfast", 4),("Breakfast", 5),
+("Lunch", 1),("Lunch", 2),("Lunch", 3),("Lunch", 4),
+("Dinner", 1),("Dinner", 2),("Dinner", 3),("Dinner", 4),("Dinner", 5),
+("Mini-Bar", 1),("Mini-Bar", 2),("Mini-Bar", 4),("Mini-Bar", 5),
+("Phone Charging Equipment", 1),("Phone Charging Equipment", 3),("Phone Charging Equipment", 4),("Phone Charging Equipment", 5),
+("Seminar Room", 1),("Seminar Room", 2),("Seminar Room", 3),("Seminar Room", 4),("Seminar Room", 5),
+("Banquet Room", 1),("Banquet Room", 4),("Banquet Room", 5),
+("Large Room", 2), ("Large Room", 3),
+("Accommodation", 6),("Accommodation", 7),("Accommodation",8),("Accommodation", 9),("Accommodation", 10),
+("Breakfast", 6),("Breakfast", 7),("Breakfast", 8),("Breakfast", 9),("Breakfast", 10),
+("Lunch", 6),("Lunch", 7),("Lunch", 8),("Lunch", 9),
+("Dinner", 6),("Dinner", 7),("Dinner", 8),("Dinner", 9),("Dinner", 10),
+("Mini-Bar", 6),("Mini-Bar", 7),("Mini-Bar", 9),("Mini-Bar", 10),
+("Phone Charging Equipment", 6),("Phone Charging Equipment", 8),("Phone Charging Equipment", 9),("Phone Charging Equipment", 10),
+("Seminar Room", 6),("Seminar Room", 7),("Seminar Room", 8),("Seminar Room", 9),("Seminar Room", 10),
+("Banquet Room", 6),("Banquet Room", 9),("Banquet Room", 10),
+("Large Room", 7), ("Large Room", 8);
+
+
+-- Insert Reservation data into reservation table when new reservations are made
+INSERT INTO Reservation 
+(HOtelID, GuestID, RoomID, ChannelProviderID, CreditCardNumber, CardExpireYear, CardExpireMonth, DateFrom, DateTo)
+VALUES
+(1, 1, 1, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20"),
+(1, 1, 2, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20"),
+(1, 1, 3, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20"),
+(1, 1, 4, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20"),
+(1, 1, 5, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20"),
+(1, 1, 6, 1, 5555555555555555, 22, 2, "2020-12-15", "2020-12-20")
+
+
+-- Insert Past Reservation data
+INSERT INTO PastReservation
+(HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+VALUES
+(1, 1, 1, "2020-10-10", "2020-10-15", "Checked-in", NULL), -- The guest has checked-in
+(1, 2, 1, "2020-12-10", "2020-12-13", "Missed", NULL), --  The guest canceled the reservation on the check-in day
+(1, 3, 1, "2020-11-22", "2020-11-23", "Canceled", NULL) -- The guest canceled the reservation before the check-in day
+
+
+-- Initialize Room Status table (In two weeks, for example), all rooms are available when there is no reservation
+INSERT INTO RoomStatus
+(RoomID, HotelID, rsDate, ReservationID, PastReservationID)
+SELECT RoomID, HotelID, "2020-12-10", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-11", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-12", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-13", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-14", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-15", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-16", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-17", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-18", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-19", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-20", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-21", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-22", NULL, NULL
+FROM Room 
+UNION
+SELECT RoomID, HotelID, "2020-12-23", NULL, NULL
+FROM Room 
+
+
+-- Insert Invoice
+INSERT INTO Invoice
+(GuestID, AmountOutstanding, PaidFlag, DateFrom, InvoiceCheckOutTime)
+VALUES
+(1, 1000, 0, "2020-12-10", NULL),
+(1, 0, 1, "2020-12-08", "2020-12-10")
+
+
+-- Insert Payment
+INSERT INTO Payment (GuestID, HotelID, InvoiceID, PayAmount, PaymentType, PayTime)
+VALUES 
+(1, 5, 3, 4500, "Cach", DATETIME('now')),
+(1, 5, 3, 3190, "Credit Card", DATETIME('now'))
+(1, 5, 3, 2000, "Credit Card", DATETIME('now'));
+
+
+-- Insert Charge
+INSERT INTO Charge 
+(GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+VALUES
+(1, 1, 3, 500, Date('now')),
+(1, 2, 3, 600, Date('now')),
+(1, 3, 3, 700, Date('now'))
+```
+

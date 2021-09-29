@@ -1,0 +1,8 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0",""
+"0","library(tidyverse) # tidyverse provides data manipulation functions and pipeline"
+"0","library(readxl) # readxl allows us to read Excel file"
+"0","library(janitor) # janitor Specify a row to be the column names"
+"0","#library(writexl)"
+"0",""
+"0","rm(list = ls()) # remove all existing variables"

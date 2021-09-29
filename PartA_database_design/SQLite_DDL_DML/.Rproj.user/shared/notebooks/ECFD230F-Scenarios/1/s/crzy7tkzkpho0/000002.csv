@@ -1,0 +1,4 @@
+"2","Error in (function (sql, outputFile, options)  : 
+  The 'connection' option (DBI connection) is required for sql chunks.
+"
+"2","Failed to execute SQL chunk"

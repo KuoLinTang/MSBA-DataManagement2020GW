@@ -1,0 +1,102 @@
+---
+title: "PartC_parse_xml"
+author: "Joseph Tang"
+date: "2020/11/11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Import all packages
+```{r}
+# install.packages('rvest')
+library(rvest) # rvest allows us to easily parse html code and get specific nodes
+library("XML") # XML allows us to easily parse XML files and convert XML code into a dataframe
+library(plyr)  # plyr help us to implement rbind.fill, which can row bind different dataframes with different column names and numbers
+library(tidyverse) # tidyverse provides data manipulation functions and pipeline
+```
+
+## Read the page and get all xml urls
+```{r}
+# Get html content
+webpage = read_html("https://data.food.gov.uk/catalog/datasets/38dd8d6a-5ab1-4f50-b753-ab33288e3200")
+
+# Get all hyperlinks from all nodes "a" under all nodes "strong" with the correct format
+hyperlink = webpage %>% 
+  html_nodes("strong") %>%
+  html_nodes("a") %>%
+  html_attr("href")
+hyperlink = hyperlink[-c(1,2)]
+
+# Get all city names
+link_name = webpage %>% 
+  html_nodes("article") %>%
+  html_nodes("h2") %>%
+  html_text()
+link_name = link_name[-c(1)]
+
+link_name = gsub("[\n]", "", link_name)
+  
+# Combine cities and hyperlinks into a dataframe
+City_to_link = data.frame(link_name, hyperlink)
+
+# Create a txt file to record all city names and their corresponding hyperlinks
+write.table(City_to_link, file = "links_v_cities.txt", sep = "\t", row.names = FALSE, col.names = FALSE)
+```
+
+
+
+## Download xml files from src (First stage)
+```{r message=FALSE}
+# Please create a directory called ALL_XML_dir before executing the following code or if downloading all xml files in the current directory, it would be very messy 
+# (CREATE A DIRECTORY IN THE CURRENT DIRECTORY CALLED "ALL_XML_dir")
+for (i in 1:nrow(City_to_link)){
+  file_path = paste0("./ALL_XML_dir/", City_to_link$link_name[i], ".xml")
+  download.file(City_to_link$hyperlink[i], destfile = file_path)
+}
+```
+
+
+
+## Parse xml files from local dir (Second stage)
+```{r}
+# Get xml path from local directory ALL_XML_dir
+local_xml_path = list.files("ALL_XML_dir/")
+
+# Create an empty data frame
+final_result = data.frame()
+
+# Start parsing xml files
+for (i in local_xml_path){
+  path = paste0("ALL_XML_dir/", i)
+  xml_content = xmlParse(file = path)
+  xmldataframe = xmlToDataFrame(getNodeSet(xml_content, "//EstablishmentDetail"))
+  # deal with the tag Scores
+  xmldataframe[,c("Scores")] = NULL
+  if (class(try(xmlToDataFrame(getNodeSet(xml_content, "//Scores")), silent = TRUE)) != "try-error"){
+    xmldataframe = cbind(xmldataframe, xmlToDataFrame(getNodeSet(xml_content, "//Scores")))
+  }
+  # deal with the tag Geocode
+  xmldataframe[,c("Geocode")] = NULL
+  if (class(try(xmlToDataFrame(getNodeSet(xml_content, "//Geocode")), silent = TRUE)) != "try-error"){
+    xmldataframe = cbind(xmldataframe, xmlToDataFrame(getNodeSet(xml_content, "//Geocode")))
+  }
+  final_result = rbind.fill(final_result, xmldataframe)
+}
+```
+
+
+## Data arrangement
+```{r}
+## Reorder columns and combine AddressLine1 ~ AddressLine4 as AddressLine
+final_result = final_result[,c(1:5, 19, 6:18, 20:25)] %>%
+  tidyr::unite(AddressLine, AddressLine1, AddressLine2, AddressLine3, AddressLine4, sep = ", ", remove = TRUE, na.rm = TRUE)
+
+# Save our data into a rds file for part D
+saveRDS(final_result, file = "final_result.rds")
+
+All_data = readRDS("final_result.rds")
+```

@@ -1,0 +1,287 @@
+---
+title: "Scenarios"
+author: "Group 13"
+date: "2020/11/22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+##=========================================INSERTING DATA=============================================
+##Insert data into guest table
+```{sql}
+INSERT INTO Guest 
+(FirstName, MiddleName, LastName, StreetNumber, StreetName, City, State, PostalCode, Country, Email, HomePhone, WorkPhone, CellPhone)
+VALUES
+("James", NULL, "Alex", NULL, "Blackfriars", "Coventry", NULL, "CV53II", "UK", NULL, NULL, NULL, NULL);
+```
+
+##Insert data into ChannelProvider table
+```{sql}
+INSERT INTO ChannelProvider
+(ChannelProviderName, Website, BookingFeeRate)
+VALUES
+("TripAdvisor", "https://www.tripadvisor.com/", 0.01);
+```
+
+##Insert data into Service table
+```{sql}
+INSERT INTO Service (ServiceName, HotelID)
+VALUES("Accommodation", 1),("Accommodation", 2),("Accommodation",3),("Accommodation", 4),("Accommodation", 5),
+("Breakfast", 1),("Breakfast", 2),("Breakfast", 3),("Breakfast", 4),("Breakfast", 5),
+("Lunch", 1),("Lunch", 2),("Lunch", 3),("Lunch", 4),
+("Dinner", 1),("Dinner", 2),("Dinner", 3),("Dinner", 4),("Dinner", 5),
+("Mini-Bar", 1),("Mini-Bar", 2),("Mini-Bar", 4),("Mini-Bar", 5),
+("Phone Charging Equipment", 1),("Phone Charging Equipment", 3),("Phone Charging Equipment", 4),("Phone Charging Equipment", 5),
+("Seminar Room", 1),("Seminar Room", 2),("Seminar Room", 3),("Seminar Room", 4),("Seminar Room", 5),
+("Banquet Room", 1),("Banquet Room", 4),("Banquet Room", 5),
+("Large Room", 2), ("Large Room", 3);
+
+/*List all services for a specific hotel*/
+SELECT ServiceName
+FROM Service
+WHERE HotelID = 5;
+```
+
+
+##========================================Scenario========================================
+##Assign 2 rooms to each channel provider
+```{sq;}
+SELECT * 
+FROM Room 
+WHERE HotelID = 5
+ORDER BY RANDOM()
+LIMIT 2;
+```
+
+
+##Check the rooms that meet the conditions
+```{sql}
+--Specify the number of beds, smoking policy and the hotel names
+SELECT HotelName, RoomID, RoomRate
+FROM Room NATURAL JOIN Hotel
+WHERE NumberOfBeds = 2 AND SmokingPolicy = FALSE AND HotelID = 3;
+```
+
+
+##Check how many rooms of a hotel are available in a particular period
+```{sql}
+--Specify the hotel names and dates
+SELECT RoomID AS Available_RoomID, Floor, NumberOfBeds, SmokingPolicy
+FROM Room
+WHERE HotelID = 5
+EXCEPT
+SELECT RoomID, Room.Floor, Room.NumberOfBeds, Room.SmokingPolicy
+FROM Reservation INNER JOIN Room USING(RoomID, HotelID)
+WHERE HotelID = 5 AND 
+((DateFrom >= '2020-11-25' AND DateFrom < '2020-11-27') OR (DateTo > '2020-11-25' AND DateTo <= '2020-11-27') OR ('2020-11-25' > DateFrom AND DateTo > '2020-11-27'));
+```
+
+
+##Check how many rooms of a hotel which meet the conditions are available in a particular period
+```{sql}
+--Specify the number of beds, smoking policy and the hotelID
+SELECT RoomID AS Available_RoomID, Floor, RoomRate
+FROM Room
+WHERE HotelID = 5 AND NumberOfBeds = 2 AND SmokingPolicy = FALSE
+EXCEPT
+SELECT RoomID, Floor, RoomRate
+FROM Reservation INNER JOIN Room USING(RoomID, HotelID)
+WHERE HotelID = 5 AND 
+((DateFrom >= '2020-11-25' AND DateFrom < '2020-11-27') OR (DateTo > '2020-11-25' AND DateTo <= '2020-11-27') OR ('2020-11-25' > DateFrom AND DateTo > '2020-11-27'));
+```
+
+
+##Check if the room of the hotel is available in a particular period
+```{sql}
+--Specify HotelID, RoomID and particular dates
+SELECT 5 AS HotelID, 801 AS RoomID, '2020-11-21' AS Start_Date, '2021-11-22' AS End_Date,
+CASE
+WHEN EXISTS(
+	SELECT HotelID, RoomID, DateFrom, DateTo 
+	FROM Reservation 
+	WHERE HotelID = 5 AND RoomID = 801 AND 
+	((DateFrom >= '2020-11-21' AND DateFrom < '2021-11-22') OR (DateTo > '2020-11-21' AND DateTo <= '2020-11-22') OR ('2020-11-21' > DateFrom AND DateTo > '2020-11-22'))
+) THEN "Not Available"
+ELSE "Available"
+END AS Availability;
+```
+
+
+
+
+##Make a reservation (Insert data into Reservation table)
+```{sql}
+INSERT INTO Reservation 
+(HotelID, GuestID, RoomID, ChannelProviderID, CreditCardNumber, CardExpireYear, CardExpireMonth, DateFrom, DateTo, SmokingPreference, NumberOfBeds, NumberOfGuests)
+SELECT 5, 1, 801, 4, 5555555555555555, 28, 3,
+CASE
+WHEN EXISTS(
+	SELECT HotelID, RoomID, DateFrom, DateTo 
+	FROM Reservation 
+	WHERE HotelID = 5 AND RoomID = 801 AND 
+	((DateFrom >= '2020-11-21' AND DateFrom < '2021-11-22') OR (DateTo > '2020-11-21' AND DateTo <= '2020-11-22') OR ('2020-11-21' > DateFrom AND DateTo > '2020-11-22'))
+) THEN "NULL"
+ELSE '2020-11-21'
+END AS DateFrom, '2020-11-22', FALSE, NULL, NULL;
+DELETE FROM Reservation 
+WHERE DateFrom = "NULL";
+
+
+/* Get ReservationIDs by Hotel names, dates of accommodation*/
+SELECT ReservationID, FirstName, LastName
+FROM Hotel NATURAL JOIN Reservation INNER JOIN Guest USING(GuestID)
+WHERE Hotelname = 'E' AND DateFrom = '2020-11-21' AND DateTo = '2020-11-22';
+
+/* Get ReservationIDs with names*/
+SELECT ReservationID, FirstName, LastName, DateFrom, DateTo
+FROM Hotel NATURAL JOIN Reservation INNER JOIN Guest USING(GuestID)
+WHERE FirstName = "Joseph" AND LastName = "Tang";
+```
+
+##Remove data from reservation if canceled
+```{sql}
+/*Use ReservationID to specified which reservation should be canceled*/
+INSERT INTO PastReservation (HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 27;
+DELETE FROM Reservation
+WHERE ReservationID = 27;
+UPDATE PastReservation
+SET PastReservationStatus = "Canceled"
+WHERE PastReservationStatus = "";
+```
+
+##Check in
+```{sql}
+/*Generate the invoice for this stay while checking in using GuestID and ReservationID*/
+INSERT INTO Invoice
+(GuestID, AmountOutstanding, PaidFlag, DateFrom, InvoiceCheckOutTime)
+SELECT GuestID, SUM(Each_Room_Fee) AS Total_Room_Fee, FALSE, DateFrom, NULL
+FROM (
+SELECT GuestID, ((JULIANDAY(DateTo)-JULIANDAY(DateFrom))*RoomRate) AS Each_Room_Fee, DateFrom
+FROM Reservation INNER JOIN Room USING(RoomID, HotelID)
+WHERE ReservationID = 29
+)
+GROUP BY GuestID;
+
+/*Get the InvoiceID with GuestID and Date*/
+SELECT *
+FROM Invoice
+WHERE GuestID = 1;
+
+
+
+/*Charge accommodation fees for this stay while checking in with InvoiceID*/
+INSERT INTO Charge (GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+SELECT GuestID, ServiceID, InvoiceID, AmountOutstanding, DATETIME('now')
+FROM Invoice, Service
+WHERE InvoiceID = 17 AND ServiceName = "Accommodation" AND HotelID = 5;
+
+
+
+
+/*Remove data from reservation while checking-in*/
+INSERT INTO PastReservation (HotelID, GuestID, RoomID, DateFrom, DateTo, PastReservationStatus, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, "", ChannelProviderID 
+FROM Reservation
+WHERE ReservationID = 29;
+DELETE FROM Reservation
+WHERE ReservationID = 29;
+UPDATE PastReservation
+SET PastReservationStatus = "Check-in"
+WHERE PastReservationStatus = "";
+```
+
+
+##During the stay in a hotel
+```{sql}
+--========We have to immediately update the AmountOutstanding when any payment or charge is made========
+/*Make Payment to the accommodation fees*/
+INSERT INTO Payment (GuestID, HotelID, InvoiceID, PayAmount, PaymentType, PayTime)
+VALUES (1, 5, 17, 4500, "Cash", DATETIME('now'));
+UPDATE Invoice
+SET 
+	AmountOutstanding = (
+		SELECT AmountOutstanding - PayAmount
+		FROM Invoice INNER JOIN Payment USING(InvoiceID)
+		WHERE InvoiceID = 17 AND PayTime = DATETIME('now'))
+WHERE InvoiceID = 17;
+
+
+/*New charge for dinner*/
+INSERT INTO Charge (GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+SELECT 1, ServiceID, 17, 2400, DATETIME('now') 
+FROM Service 
+WHERE HotelID = 5 AND ServiceName = "Dinner";
+UPDATE Invoice
+SET 
+	AmountOutstanding = (
+		SELECT AmountOutstanding + ChargeAmount
+		FROM Invoice INNER JOIN Charge USING(InvoiceID)
+		WHERE InvoiceID = 17 AND ChargeTime = DATETIME('now'))
+WHERE InvoiceID = 17;
+
+
+/*New charge for mini-bar*/
+INSERT INTO Charge (GuestID, ServiceID, InvoiceID, ChargeAmount, ChargeTime)
+SELECT 1, ServiceID, 17, 790, DATETIME('now') 
+FROM Service 
+WHERE HotelID = 5 AND ServiceName = "Mini-Bar";
+UPDATE Invoice
+SET 
+	AmountOutstanding = (
+		SELECT AmountOutstanding + ChargeAmount
+		FROM Invoice INNER JOIN Charge USING(InvoiceID)
+		WHERE InvoiceID = 17 AND ChargeTime = DATETIME('now'))
+WHERE InvoiceID = 17;
+```
+
+
+##Check Out
+```{sql}
+/*Check if AmountOutstanding of invoice for a guest is 0*/
+SELECT FirstName, LastName, AmountOutstanding, PaidFlag, DateFrom, InvoiceCheckOutTime
+FROM Invoice INNER JOIN Guest USING (GuestID)
+WHERE InvoiceID = 17;
+
+
+/*If yes, set the paidflag of invoice to 1 and check out the invoice*/
+UPDATE Invoice
+SET InvoiceCheckOutTime = DATE('now'), PaidFlag = TRUE
+WHERE InvoiceID = 17;
+
+
+/*If no, request the guest to pay the rest of the charges and check out the invoice*/
+INSERT INTO Payment (GuestID, HotelID, InvoiceID, PayAmount, PaymentType, PayTime)
+VALUES (1, 5, 17, 3190, "Credit Card", DATETIME('now'));
+UPDATE Invoice
+SET 
+	AmountOutstanding = (
+		SELECT AmountOutstanding - PayAmount
+		FROM Invoice INNER JOIN Payment USING(InvoiceID)
+		WHERE InvoiceID = 17 AND PayTime = DATETIME('now'))
+WHERE InvoiceID = 17;
+UPDATE Invoice
+SET InvoiceCheckOutTime = DATE('now'), PaidFlag = TRUE
+WHERE InvoiceID = 17;
+
+
+/*Check the invoice which lists all events*/
+SELECT 'Charge', ServiceName, ChargeAmount AS Amount, ChargeTime AS Event_time
+FROM Charge INNER JOIN Service USING (ServiceID)
+WHERE InvoiceID = 17
+UNION
+SELECT 'Payment', PaymentType, PayAmount, PayTime AS Event_time
+FROM Payment
+WHERE InvoiceID = 17
+UNION
+SELECT 'Total Spend', 'Overall', SUM(PayAmount), DATETIME('now')
+FROM Payment
+WHERE InvoiceID = 17
+ORDER BY Event_time;
+```

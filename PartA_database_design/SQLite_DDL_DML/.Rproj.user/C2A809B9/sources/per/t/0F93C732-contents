@@ -1,0 +1,210 @@
+---
+title: "DDL_sqlite"
+author: "Group 13"
+date: "2020/11/9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+##Create Guest table
+```{sql}
+CREATE TABLE Guest(
+GuestID INTEGER PRIMARY KEY AUTOINCREMENT,
+FirstName VARCHAR(30) NOT NULL,
+MiddleName VARCHAR(30),
+LastName VARCHAR(30) NOT NULL,
+StreetNumber INTEGER,
+StreetName VARCHAR(30) NOT NULL,
+City VARCHAR(30) NOT NULL,
+State VARCHAR(30),
+PostalCode VARCHAR(10) NOT NULL,
+Country VARCHAR(30) NOT NULL,
+Email VARCHAR(100),
+HomePhone INTEGER,
+WorkPhone INTEGER,
+CellPhone INTEGER
+);
+```
+
+##Create Hotel table
+```{sql}
+CREATE TABLE Hotels(
+HotelID INTEGER PRIMARY KEY AUTOINCREMENT,
+HotelName VARCHAR(30) NOT NULL,
+StreetNumber INTEGER,
+StreetName VARCHAR(30),
+City VARCHAR(30) NOT NULL,
+State VARCHAR(30),
+PostalCode VARCHAR(10) NOT NULL,
+Country VARCHAR(30) NOT NULL,
+WebAddress VARCHAR(100),
+PrimaryPhone INTEGER
+);
+```
+
+
+##CREATE Channel table
+```{sql}
+CREATE TABLE ChannelProvider(
+ChannelProviderID INTEGER PRIMARY KEY AUTOINCREMENT,
+ChannelProviderName VARCHAR(30) NOT NULL,
+Website VARCHAR(200),
+BookingFeeRate DOUBLE NOT NULL DEFAULT 0.05
+);
+```
+
+
+##Create PastReservation table
+```{sql}
+CREATE TABLE PastReservation(
+  PastReservationID INTEGER PRIMARY KEY AUTOINCREMENT,
+  HotelID INTEGER NOT NULL,
+  GuestID INTEGER NOT NULL,
+  RoomID VARCHAR(30) NOT NULL,
+  DateFrom DATE NOT NULL,
+  DateTo DATE NOT NULL, 
+  PastReservationStatus VARCHAR(20),
+  ChannelProviderID INTEGER,
+  FOREIGN KEY (GuestID) REFERENCES Guest(GuestID)
+);
+
+
+INSERT INTO PastReservation (HotelID, GuestID, RoomID, DateFrom, DateTo, ChannelProviderID)
+SELECT HotelID, GuestID, RoomID, DateFrom, DateTo, ChannelProviderID FROM Reservation;
+```
+
+
+##Create RoomAvailable table
+```{sql}
+CREATE TABLE RoomAvailable(
+  ChannelProviderID INTEGER,
+  HotelID INTEGER,
+  NumberOfAvailableRooms INTEGER DEFAULT 0,
+  DateFrom DATE,
+  DateTo DATE,
+  PRIMARY KEY (ChannelProviderID, HotelID),
+  FOREIGN KEY (ChannelProviderID) REFERENCES ChannelProvider(ChannelProviderID),
+  FOREIGN KEY (HotelID) REFERENCES Hotel(HotelID)
+);
+
+```
+
+
+##Create Service Table
+```{sql}
+CREATE TABLE Service(
+  ServiceID INTEGER PRIMARY KEY AUTOINCREMENT,
+  ServiceName VARCHAR(30) NOT NULL,
+  HotelID INTEGER,
+  FOREIGN KEY (HotelID) REFERENCES Hotel(HotelID)
+);
+
+```
+
+
+##Create Room table
+```{sql}
+CREATE TABLE Room(
+RoomID VARCHAR(30),
+HotelID INTEGER NOT NULL,
+Floor INTEGER NOT NULL,
+HighOrLow VARCHAR(10),
+NumberOfBeds INTEGER NOT NULL,
+SmokingPolicy BOOLEAN,
+RoomRate INTEGER,
+FOREIGN KEY (HotelID) REFERENCES Hotel(HotelID),
+PRIMARY KEY (RoomID, HotelID)
+);
+```
+
+
+##Create Reservation table
+```{sql}
+CREATE TABLE Reservation(
+ReservationID INTEGER PRIMARY KEY AUTOINCREMENT,
+HotelID INTEGER NOT NULL,
+GuestID INTEGER NOT NULL,
+RoomID VARCHAR(30) NOT NULL,
+ChannelProviderID INTEGER,
+CreditCardNumber INTEGER NOT NULL,
+CardExpireYear INTEGER NOT NULL,
+CardExpireMonth INTEGER NOT NULL,
+DateFrom DATE NOT NULL,
+DateTo DATE NOT NULL,
+SmokingPreference BOOLEAN DEFAULT FALSE,
+NumberOfBeds INTEGER DEFAULT 1,
+NumberOfGuests INTEGER DEFAULT 2,
+FOREIGN KEY (GuestID) REFERENCES Guest(GuestID),
+FOREIGN KEY (RoomID,HotelID) REFERENCES Room(RoomID,HotelID),
+FOREIGN KEY (ChannelProviderID) REFERENCES ChannelProvider(ChannelProviderID),
+CHECK(CreditCardNumber BETWEEN 0 AND 9999999999999999),
+CHECK(CardExpireYear BETWEEN 0 AND 99),
+CHECK(CardExpireMonth BETWEEN 1 AND 12)
+);
+```
+
+
+##Create RoomStatus table
+```{sql}
+CREATE TABLE RoomStatus(
+RoomStatusID INTEGER PRIMARY KEY AUTOINCREMENT,
+RoomStatus BOOLEAN DEFAULT 0,
+RoomID VARCHAR(30),
+HotelID INTEGER,
+rsDate DATE NOT NULL,
+FOREIGN KEY (RoomID, HotelID) REFERENCES Room(RoomID, HotelID)
+);
+```
+
+
+##Create Invoice table
+```{sql}
+CREATE TABLE Invoice(
+InvoiceID INTEGER PRIMARY KEY AUTOINCREMENT,
+GuestID INTEGER NOT NULL,
+AmountOutstanding INTEGER,
+PaidFlag BOOLEAN DEFAULT FALSE,
+DateFrom DATETIME NOT NULL,
+InvoiceCheckOutTime DATETIME,
+FOREIGN KEY (GuestID) REFERENCES Guest(GuestID)
+);
+```
+
+
+##Create Charge table
+```{sql}
+CREATE TABLE Charge(
+  ChargeID INTEGER PRIMARY KEY AUTOINCREMENT,
+  GuestID INTEGER NOT NULL,
+  ServiceID INTEGER,
+  InvoiceID INTEGER NOT NULL,
+  ChargeAmount INTEGER NOT NULL,
+  ChargeTime DATETIME,
+  FOREIGN KEY (GuestID) REFERENCES Guest(GuestID),
+  FOREIGN KEY (ServiceID) REFERENCES Service(ServiceID),
+  FOREIGN KEY (InvoiceID) REFERENCES Invoice(InvoiceID)
+);
+
+```
+
+
+##Create Payment table 
+```{sql}
+CREATE TABLE Payment(
+PaymentID INTEGER PRIMARY KEY AUTOINCREMENT,
+GuestID INTEGER NOT NULL,
+HotelID INTEGER,
+InvoiceID INTEGER,
+PayAmount INTEGER NOT NULL,
+PaymentType VARCHAR(30),
+PayTime DATETIME,
+FOREIGN KEY (GuestID) REFERENCES Guest(GuestID),
+FOREIGN KEY (HotelID) REFERENCES Hotel(HotelID),
+FOREIGN KEY (InvoiceID) REFERENCES Invoice(InvoiceID)
+);
+```
+

@@ -1,0 +1,7 @@
+"0","structured_Albania_Imports = Albania_Imports %>%"
+"0","  gather(key = ""product"", value = ""value"", -c(""country"", ""year"", ""flow"")) %>%"
+"0","  arrange(year) %>%"
+"0","  select(country, year, flow, product, value)"
+"0","structured_Albania_Imports$value = as.numeric(structured_Albania_Imports$value)"
+"0",""
+"0","head(structured_Albania_Imports,10)"

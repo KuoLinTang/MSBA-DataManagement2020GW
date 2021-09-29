@@ -1,0 +1,1154 @@
+"0","library(tidyverse)"
+"0","library(""XML"")"
+"0",""
+"0","i = 1"
+"0","for (cities_URL in d[,1]){"
+"0","  print(i)"
+"0","  download.file(cities_URL, destfile = ""Temp_dir/temp.xml"")"
+"0","  xml_content = xmlParse(file = ""Temp_dir/temp.xml"", useInternalNodes = TRUE)"
+"0","  xmldataframe = xmlToDataFrame(getNodeSet(xml_content, ""//EstablishmentDetail""))"
+"0","  #xmldataframe[,c(""Scores"")] = NULL"
+"0","  #xmldataframe = cbind(xmldataframe, xmlToDataFrame(getNodeSet(xml_content, ""//Scores"")))"
+"0","  xmldataframe[,c(""Geocode"")] = NULL"
+"0","  xmldataframe = cbind(xmldataframe, xmlToDataFrame(getNodeSet(xml_content, ""//Geocode"")))"
+"0","  temp_path = paste0(""Final_format_files/"",d[i,2], "".csv"")"
+"0","  write_csv(xmldataframe, temp_path)"
+"0","  print(i)"
+"0","  i=i+1"
+"0","}"
+"1","[1]"
+"1"," 1"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS760en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1974794 bytes (1.9 MB)
+"
+"2","downloaded 1.9 MB
+
+"
+"1","[1]"
+"1"," 1"
+"1","
+"
+"1","[1]"
+"1"," 2"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS761en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2087203 bytes (2.0 MB)
+"
+"2","downloaded 2.0 MB
+
+"
+"1","[1]"
+"1"," 2"
+"1","
+"
+"1","[1]"
+"1"," 3"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS323en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 486640 bytes (475 KB)
+"
+"2","downloaded 475 KB
+
+"
+"1","[1]"
+"1"," 3"
+"1","
+"
+"1","[1]"
+"1"," 4"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS055en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1170235 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 4"
+"1","
+"
+"1","[1]"
+"1"," 5"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS062en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1020277 bytes (996 KB)
+"
+"2","downloaded 996 KB
+
+"
+"1","[1]"
+"1"," 5"
+"1","
+"
+"1","[1]"
+"1"," 6"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles//FHRS551en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 762892 bytes (745 KB)
+"
+"2","downloaded 745 KB
+
+"
+"1","[1]"
+"1"," 6"
+"1","
+"
+"1","[1]"
+"1"," 7"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS551cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 765960 bytes (748 KB)
+"
+"2","downloaded 748 KB
+
+"
+"1","[1]"
+"1"," 7"
+"1","
+"
+"1","[1]"
+"1"," 8"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS762en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 946843 bytes (924 KB)
+"
+"2","downloaded 924 KB
+
+"
+"1","[1]"
+"1"," 8"
+"1","
+"
+"1","[1]"
+"1"," 9"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS801en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1231297 bytes (1.2 MB)
+"
+"2","downloaded 1.2 MB
+
+"
+"1","[1]"
+"1"," 9"
+"1","
+"
+"1","[1]"
+"1"," 10"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS802en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1424049 bytes (1.4 MB)
+"
+"2","downloaded 1.4 MB
+
+"
+"1","[1]"
+"1"," 10"
+"1","
+"
+"1","[1]"
+"1"," 11"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS763en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 869316 bytes (848 KB)
+"
+"2","downloaded 848 KB
+
+"
+"1","[1]"
+"1"," 11"
+"1","
+"
+"1","[1]"
+"1"," 12"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS803en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1891761 bytes (1.8 MB)
+"
+"2","downloaded 1.8 MB
+
+"
+"1","[1]"
+"1"," 12"
+"1","
+"
+"1","[1]"
+"1"," 13"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS324en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1229195 bytes (1.2 MB)
+"
+"2","downloaded 1.2 MB
+
+"
+"1","[1]"
+"1"," 13"
+"1","
+"
+"1","[1]"
+"1"," 14"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS259en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 828209 bytes (808 KB)
+"
+"2","downloaded 808 KB
+
+"
+"1","[1]"
+"1"," 14"
+"1","
+"
+"1","[1]"
+"1"," 15"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS179en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1139316 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 15"
+"1","
+"
+"1","[1]"
+"1"," 16"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS297en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 912731 bytes (891 KB)
+"
+"2","downloaded 891 KB
+
+"
+"1","[1]"
+"1"," 16"
+"1","
+"
+"1","[1]"
+"1"," 17"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS501en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1216345 bytes (1.2 MB)
+"
+"2","downloaded 1.2 MB
+
+"
+"1","[1]"
+"1"," 17"
+"1","
+"
+"1","[1]"
+"1"," 18"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS502en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2090982 bytes (2.0 MB)
+"
+"2","downloaded 2.0 MB
+
+"
+"1","[1]"
+"1"," 18"
+"1","
+"
+"1","[1]"
+"1"," 19"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS401en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1886637 bytes (1.8 MB)
+"
+"2","downloaded 1.8 MB
+
+"
+"1","[1]"
+"1"," 19"
+"1","
+"
+"1","[1]"
+"1"," 20"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS056en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 594694 bytes (580 KB)
+"
+"2","downloaded 580 KB
+
+"
+"1","[1]"
+"1"," 20"
+"1","
+"
+"1","[1]"
+"1"," 21"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS109en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1223868 bytes (1.2 MB)
+"
+"2","downloaded 1.2 MB
+
+"
+"1","[1]"
+"1"," 21"
+"1","
+"
+"1","[1]"
+"1"," 22"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS131en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1155408 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 22"
+"1","
+"
+"1","[1]"
+"1"," 23"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS260en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1010430 bytes (986 KB)
+"
+"2","downloaded 986 KB
+
+"
+"1","[1]"
+"1"," 23"
+"1","
+"
+"1","[1]"
+"1"," 24"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS857en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1854402 bytes (1.8 MB)
+"
+"2","downloaded 1.8 MB
+
+"
+"1","[1]"
+"1"," 24"
+"1","
+"
+"1","[1]"
+"1"," 25"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS701en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1472278 bytes (1.4 MB)
+"
+"2","downloaded 1.4 MB
+
+"
+"1","[1]"
+"1"," 25"
+"1","
+"
+"1","[1]"
+"1"," 26"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS807en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3299553 bytes (3.1 MB)
+"
+"2","downloaded 3.1 MB
+
+"
+"1","[1]"
+"1"," 26"
+"1","
+"
+"1","[1]"
+"1"," 27"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS503en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1542838 bytes (1.5 MB)
+"
+"2","downloaded 1.5 MB
+
+"
+"1","[1]"
+"1"," 27"
+"1","
+"
+"1","[1]"
+"1"," 28"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS402en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 9421313 bytes (9.0 MB)
+"
+"2","downloaded 9.0 MB
+
+"
+"1","[1]"
+"1"," 28"
+"1","
+"
+"1","[1]"
+"1"," 29"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS209en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 652515 bytes (637 KB)
+"
+"2","downloaded 637 KB
+
+"
+"1","[1]"
+"1"," 29"
+"1","
+"
+"1","[1]"
+"1"," 30"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS897en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1183955 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 30"
+"1","
+"
+"1","[1]"
+"1"," 31"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS898en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1724636 bytes (1.6 MB)
+"
+"2","downloaded 1.6 MB
+
+"
+"1","[1]"
+"1"," 31"
+"1","
+"
+"1","[1]"
+"1"," 32"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS552en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 696962 bytes (680 KB)
+"
+"2","downloaded 680 KB
+
+"
+"1","[1]"
+"1"," 32"
+"1","
+"
+"1","[1]"
+"1"," 33"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS552cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 698151 bytes (681 KB)
+"
+"2","downloaded 681 KB
+
+"
+"1","[1]"
+"1"," 33"
+"1","
+"
+"1","[1]"
+"1"," 34"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS063en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 668345 bytes (652 KB)
+"
+"2","downloaded 652 KB
+
+"
+"1","[1]"
+"1"," 34"
+"1","
+"
+"1","[1]"
+"1"," 35"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS403en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2228067 bytes (2.1 MB)
+"
+"2","downloaded 2.1 MB
+
+"
+"1","[1]"
+"1"," 35"
+"1","
+"
+"1","[1]"
+"1"," 36"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS219en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 572734 bytes (559 KB)
+"
+"2","downloaded 559 KB
+
+"
+"1","[1]"
+"1"," 36"
+"1","
+"
+"1","[1]"
+"1"," 37"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS872en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3374419 bytes (3.2 MB)
+"
+"2","downloaded 3.2 MB
+
+"
+"1","[1]"
+"1"," 37"
+"1","
+"
+"1","[1]"
+"1"," 38"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS882en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 745792 bytes (728 KB)
+"
+"2","downloaded 728 KB
+
+"
+"1","[1]"
+"1"," 38"
+"1","
+"
+"1","[1]"
+"1"," 39"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS404en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 4126499 bytes (3.9 MB)
+"
+"2","downloaded 3.9 MB
+
+"
+"1","[1]"
+"1"," 39"
+"1","
+"
+"1","[1]"
+"1"," 40"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS110en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1164687 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 40"
+"1","
+"
+"1","[1]"
+"1"," 41"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS227en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1317237 bytes (1.3 MB)
+"
+"2","downloaded 1.3 MB
+
+"
+"1","[1]"
+"1"," 41"
+"1","
+"
+"1","[1]"
+"1"," 42"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS504en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2127556 bytes (2.0 MB)
+"
+"2","downloaded 2.0 MB
+
+"
+"1","[1]"
+"1"," 42"
+"1","
+"
+"1","[1]"
+"1"," 43"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS111en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 652745 bytes (637 KB)
+"
+"2","downloaded 637 KB
+
+"
+"1","[1]"
+"1"," 43"
+"1","
+"
+"1","[1]"
+"1"," 44"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS553en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1422545 bytes (1.4 MB)
+"
+"2","downloaded 1.4 MB
+
+"
+"1","[1]"
+"1"," 44"
+"1","
+"
+"1","[1]"
+"1"," 45"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS553cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1436495 bytes (1.4 MB)
+"
+"2","downloaded 1.4 MB
+
+"
+"1","[1]"
+"1"," 45"
+"1","
+"
+"1","[1]"
+"1"," 46"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS875en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3221990 bytes (3.1 MB)
+"
+"2","downloaded 3.1 MB
+
+"
+"1","[1]"
+"1"," 46"
+"1","
+"
+"1","[1]"
+"1"," 47"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS855en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 4200041 bytes (4.0 MB)
+"
+"2","downloaded 4.0 MB
+
+"
+"1","[1]"
+"1"," 47"
+"1","
+"
+"1","[1]"
+"1"," 48"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS228en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 935384 bytes (913 KB)
+"
+"2","downloaded 913 KB
+
+"
+"1","[1]"
+"1"," 48"
+"1","
+"
+"1","[1]"
+"1"," 49"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS505en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2179799 bytes (2.1 MB)
+"
+"2","downloaded 2.1 MB
+
+"
+"1","[1]"
+"1"," 49"
+"1","
+"
+"1","[1]"
+"1"," 50"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS145en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 749372 bytes (731 KB)
+"
+"2","downloaded 731 KB
+
+"
+"1","[1]"
+"1"," 50"
+"1","
+"
+"1","[1]"
+"1"," 51"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS155en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 731401 bytes (714 KB)
+"
+"2","downloaded 714 KB
+
+"
+"1","[1]"
+"1"," 51"
+"1","
+"
+"1","[1]"
+"1"," 52"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS261en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 850017 bytes (830 KB)
+"
+"2","downloaded 830 KB
+
+"
+"1","[1]"
+"1"," 52"
+"1","
+"
+"1","[1]"
+"1"," 53"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS021en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 4294486 bytes (4.1 MB)
+"
+"2","downloaded 4.1 MB
+
+"
+"1","[1]"
+"1"," 53"
+"1","
+"
+"1","[1]"
+"1"," 54"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS196en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 905888 bytes (884 KB)
+"
+"2","downloaded 884 KB
+
+"
+"1","[1]"
+"1"," 54"
+"1","
+"
+"1","[1]"
+"1"," 55"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS405en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1187847 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"1","[1]"
+"1"," 55"
+"1","
+"
+"1","[1]"
+"1"," 56"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS555en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1528903 bytes (1.5 MB)
+"
+"2","downloaded 1.5 MB
+
+"
+"1","[1]"
+"1"," 56"
+"1","
+"
+"1","[1]"
+"1"," 57"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS555cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1529444 bytes (1.5 MB)
+"
+"2","downloaded 1.5 MB
+
+"
+"1","[1]"
+"1"," 57"
+"1","
+"
+"1","[1]"
+"1"," 58"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS406en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 2118001 bytes (2.0 MB)
+"
+"2","downloaded 2.0 MB
+
+"
+"1","[1]"
+"1"," 58"
+"1","
+"
+"1","[1]"
+"1"," 59"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS027en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1408036 bytes (1.3 MB)
+"
+"2","downloaded 1.3 MB
+
+"
+"1","[1]"
+"1"," 59"
+"1","
+"
+"1","[1]"
+"1"," 60"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS506en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3467904 bytes (3.3 MB)
+"
+"2","downloaded 3.3 MB
+
+"
+"1","[1]"
+"1"," 60"
+"1","
+"
+"1","[1]"
+"1"," 61"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS287en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 823152 bytes (803 KB)
+"
+"2","downloaded 803 KB
+
+"
+"1","[1]"
+"1"," 61"
+"1","
+"
+"1","[1]"
+"1"," 62"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS180en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1578035 bytes (1.5 MB)
+"
+"2","downloaded 1.5 MB
+
+"
+"1","[1]"
+"1"," 62"
+"1","
+"
+"1","[1]"
+"1"," 63"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS556en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3781611 bytes (3.6 MB)
+"
+"2","downloaded 3.6 MB
+
+"
+"1","[1]"
+"1"," 63"
+"1","
+"
+"1","[1]"
+"1"," 64"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS556cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 3785055 bytes (3.6 MB)
+"
+"2","downloaded 3.6 MB
+
+"
+"1","[1]"
+"1"," 64"
+"1","
+"
+"1","[1]"
+"1"," 65"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS057en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 945171 bytes (923 KB)
+"
+"2","downloaded 923 KB
+
+"
+"1","[1]"
+"1"," 65"
+"1","
+"
+"1","[1]"
+"1"," 66"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS558en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1853482 bytes (1.8 MB)
+"
+"2","downloaded 1.8 MB
+
+"
+"1","[1]"
+"1"," 66"
+"1","
+"
+"1","[1]"
+"1"," 67"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS558cy-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1879430 bytes (1.8 MB)
+"
+"2","downloaded 1.8 MB
+
+"
+"1","[1]"
+"1"," 67"
+"1","
+"
+"1","[1]"
+"1"," 68"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS112en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 505472 bytes (493 KB)
+"
+"2","downloaded 493 KB
+
+"
+"1","[1]"
+"1"," 68"
+"1","
+"
+"1","[1]"
+"1"," 69"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS805en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1557574 bytes (1.5 MB)
+"
+"2","downloaded 1.5 MB
+
+"
+"1","[1]"
+"1"," 69"
+"1","
+"
+"1","[1]"
+"1"," 70"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS702en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1336985 bytes (1.3 MB)
+"
+"2","downloaded 1.3 MB
+
+"
+"1","[1]"
+"1"," 70"
+"1","
+"
+"1","[1]"
+"1"," 71"
+"1","
+"
+"2","嘗試 URL 'http://ratings.food.gov.uk/OpenDataFiles/FHRS557en-GB.xml'
+"
+"2","Content type 'text/xml'"
+"2"," length 1173687 bytes (1.1 MB)
+"
+"2","downloaded 1.1 MB
+
+"
+"2","
+"
+"2","
+"

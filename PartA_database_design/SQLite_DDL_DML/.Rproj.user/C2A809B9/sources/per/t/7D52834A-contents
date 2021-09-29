@@ -1,0 +1,115 @@
+---
+title: "DQL_sqlite"
+author: "Group 13"
+date: "2020/11/19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assumptions
+1. All checked-in or canceled reservations will be moved to the PastReservation table 
+2. Accommodation fees will not be charged to secure a reservation before checking in
+3. Accommodation fees will be charged while checking in, so the Charge table will record every event including accommodation fees during a stay. Meanwhile, an invoice will be generated and updated during the stay and will be settled up while checking out
+4. All payments for a guest for a specific stay will be made while checking out
+5. The service table will store all activities and services provided by hotels including accommodation fees
+6. Hotels have to pay referral fees to channel providers for those checked-in reservations (Can be accessed by PastReservation table)
+7. Every reservation will be assigned with a room (RoomID)
+
+
+#The total spent for the customer for a particular stay (checkout invoice) (FINISHED)
+```{sql}
+/*Use InvoiceID to specify a particular stay*/
+SELECT GuestID, SUM(ChargeAmount) AS Total_Spend, DateFrom AS Check_In_Date, InvoiceCheckOutTime AS Check_Out_Date, InvoiceID
+FROM Charge NATURAL JOIN Invoice
+WHERE PaidFlag = TRUE AND GuestID = 1 AND InvoiceID = 1
+GROUP BY GuestID, InvoiceID;
+
+/*Use Date to specify a particular stay*/
+SELECT GuestID, SUM(ChargeAmount) AS Total_Spend, DateFrom AS Check_In_Date, InvoiceCheckOutTime AS Check_Out_Date, InvoiceID
+FROM Charge NATURAL JOIN Invoice
+WHERE PaidFlag = TRUE AND GuestID = 1 AND Check_In_Date <= "2019-10-13" AND Check_Out_Date >= "2019-10-13"
+GROUP BY GuestID, InvoiceID;
+```
+
+#The most valuable customers in (a) the last two months, (b) past year and (c) from the beginning of the records.    (FINISHED)
+```{sql}
+/*(a)*/
+SELECT GuestID, FirstName, LastName, SUM(PayAmount) AS Total_Value, DATE('now','-2 month') AS Date_From, DATE('now') AS Date_To
+FROM Payment NATURAL JOIN Guest
+WHERE PayTime <= DATE('now') AND PayTime >= DATE('now','-2 month')
+GROUP BY GuestID
+ORDER BY Total_Value DESC
+LIMIT 1;
+
+
+
+/*(b)*/
+SELECT GuestID, FirstName, LastName, SUM(PayAmount) AS Total_Value, DATE('now','-1 year') AS Date_From, DATE('now') AS Date_To
+FROM Payment NATURAL JOIN Guest
+WHERE PayTime <= DATE('now') AND PayTime >= DATE('now','-1 year')
+GROUP BY GuestID
+ORDER BY Total_Value DESC
+LIMIT 1;
+
+
+
+/*(c)*/
+SELECT GuestID, FirstName, LastName, SUM(PayAmount) AS Total_Value
+FROM Payment NATURAL JOIN Guest
+GROUP BY GuestID
+ORDER BY Total_Value DESC
+LIMIT 1;
+```
+
+#Which are the top countries where our customers come from ? (FINISHED)
+```{sql}
+SELECT Country, COUNT(GuestID) AS Number_of_Guests
+FROM Guest
+GROUP BY country
+ORDER BY COUNT(GuestID) DESC, Country
+LIMIT 1;
+```
+
+#How much did the hotel pay in referral fees for each of the platforms that we have contracted with? (FINISHED)
+```{sql}
+SELECT Hotel.HotelID, Hotel.HotelName, ChannelProviderName, SUM(BookingFeeRate * RoomRate * (JulianDay(DateTo)-Julianday(DateFrom))) AS Referral_Fee, 
+	STRFTIME('%Y', PastReservation.DateTo) AS Year, STRFTIME('%m', PastReservation.DateTo) AS Month
+FROM Room NATURAL JOIN Hotel, PastReservation NATURAL JOIN ChannelProvider
+WHERE Room.HotelID = PastReservation.HotelID AND Room.RoomID = PastReservation.RoomID
+AND PastReservationStatus = "Check-in"
+GROUP BY MONTH, YEAR, Hotel.HotelID, ChannelProviderID
+ORDER BY YEAR, MONTH;
+```
+
+#What is the utilization rate for each hotel (that is the average billable days of a hotel specified as the average utilization of room bookings for the last 12 months)  (FINISHED)
+```{sql}
+/*In the past 12 months，the number of days of stays for a room of a hotel represents the number of billable days for that specific room. Therefore, the average billable days of a hotel is the mean of the number of billable days for all rooms in that hotel */
+SELECT HotelID, AVG(Total_Number_of_billable_days) AS Average_Billable_days
+FROM (
+	SELECT HotelID, RoomID, SUM(billable_day) AS Total_Number_of_billable_days
+	FROM (
+		SELECT HotelID, RoomID, 
+		CASE 
+		WHEN DateFrom < DATE('now', '-1 year') THEN JulianDay(DateTo)-Julianday(DATE('now', '-1 year'))
+		ELSE JulianDay(DateTo)-Julianday(DateFrom)
+		END billable_day
+		FROM PastReservation NATURAL JOIN Hotel
+		WHERE DATE(DateTo, '-1 day') >= DATE('now', '-1 year') AND PastReservationStatus = 'Check-in'
+	)
+	GROUP BY HotelID, RoomID
+)
+GROUP BY HotelID;
+
+```
+
+#Calculate the Customer Value in terms of total spent for each customer before the current booking.  (FINISHED)
+```{sql}
+/* Current Booking means that its invoice has not been checked out (the guest has not checked out) */
+SELECT GuestID, FirstName, LastName, SUM(PayAmount) AS Total_Spend
+FROM Invoice NATURAL JOIN Payment NATURAL JOIN Guest
+WHERE InvoiceCheckOutTime IS NOT NULL
+GROUP BY GuestID;
+```

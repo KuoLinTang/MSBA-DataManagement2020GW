@@ -1,0 +1,149 @@
+---
+title: "Data Management - Part B"
+author: "Group 13"
+date: "2020/11/13"
+output: 
+  pdf_document: 
+    toc: yes
+    number_sections: yes
+
+---
+\newpage
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) # tidyverse provides data manipulation functions and pipeline
+library(readxl) # readxl allows us to read Excel file
+library(janitor) # Function "row_to_names" in janitor can specify a row to be the column names
+
+
+rm(list = ls()) # remove all existing variables
+```
+
+
+# Part B
+
+* Put the data in the unstructured format into a single file
+* Provide a dataset that contains information of products and their values by country, year, and flow 
+  that can be used for further analysis
+* Provide a high-level dataset description
+
+
+## Use the ``bash`` command unzip to get the originals out 
+
+```{bash,eval=FALSE}
+cd Data_Management_Assignment # Data_Management_Assignment is the directory where the project is stores
+unzip "*.zip"
+```
+
+
+## Build a function that takes excel files as input and merges them in a structured data frame
+
+```{r message=FALSE, warning=FALSE, attr.source='.numberLines'}
+DataFormation = function(file_path){
+  data = read_excel(file_path)
+  
+  # Remove column 2 since it doesn't contain any values
+  data[,2] = NULL
+  
+  # The name of the flow is stored in the second row of column ...3
+  Flow = data$...3[2]
+  
+  # The name of the country is stored in the fourth row of column ...3
+  Country = data$...3[4]
+  
+  # Filter rows to only keep product and year information
+  data = data %>%
+    filter(...1 %in% c("Product", 1960:2013)) 
+  
+  # Replace ".." values with NA
+  data[data == ".."] = NA
+  
+  # Rename the original columns and add two more columns - country and flow 
+  data = data %>%
+    row_to_names(row_number = 1) %>%
+    rename(year = Product) %>%
+    mutate(country = Country, flow = Flow)
+  
+  # Start gathering (pivoting data longer)
+  structured_data = data %>%
+    gather(key = "product", 
+           value = "value", 
+           -c("country", "year", "flow")) %>%
+    arrange(year) %>%                             
+    select(country, year, flow, product, value)   # Reorder the order of columns
+  
+  structured_data$value = as.numeric(structured_data$value)
+  
+  return(structured_data)
+}
+```
+
+
+## Apply this function to all excel files in the directories
+
+```{r message=FALSE, warning=FALSE, attr.source='.numberLines'}
+FINAL_structural_data = data.frame()  # Create an empty dataframe
+
+all_country_directories = list.files("group_assignment/")
+for (country in all_country_directories){
+  all_files = list.files(paste0("group_assignment/", country, "/"))
+  for (file in all_files){
+    file = paste0("group_assignment/", country, "/", file)
+    FINAL_structural_data = rbind(FINAL_structural_data, DataFormation(file))
+  }
+}
+
+# Check if the structure is the same as the assignment description
+head(FINAL_structural_data %>% filter(country == "Germany", flow == "Production"), 10)
+```
+
+
+## Remove missing values if there is no observation across the whole period and flows for each country and product
+
+# Our Assumption:
+If the values for a specific country and product remain NA across the whole period and all flows, it can be assumed that there is no effective measure conducted to record this product in that country. So we remove records if there is no non-NA value across the whole period and flows for each product and country and convert the rest of missing values into 0.
+
+```{r}
+# Get total number of missing values for each country and each product across years
+a = aggregate(value ~ country + product, data=FINAL_structural_data, function(x) {sum(is.na(x))}, na.action = NULL)
+
+# Get total number of records for each country and each product across years
+b = FINAL_structural_data %>%
+  group_by(country, product) %>%
+  summarise(n = n())
+
+# Inner join the two data frame above to check if the number of records equals to the number of missing values under the same country and the same product
+c = merge(a, b, by = c("product", "country"), all = T)
+
+# If number of missing value equals to number of records, then all records for a particular product in this country are missing (across years and flows) 
+d = c[which(c$value == c$n), c("country", "product")]
+
+# Remove records if there is no non-NA value across the whole period and flows for each product and each country
+FINAL_DATA_NA_REMOVE = FINAL_structural_data
+for (i in 1:nrow(d)){
+  FINAL_DATA_NA_REMOVE = FINAL_DATA_NA_REMOVE %>%
+    filter(country != d[i,1] | product != d[i,2])
+}
+
+# Convert the rest of missing values into 0
+FINAL_DATA_NA_REMOVE[is.na(FINAL_DATA_NA_REMOVE)] = 0
+```
+
+
+## Get a high-level overview of the newly created dataset
+
+* Output the total number of records
+
+```{r message=FALSE, warning=FALSE, attr.source='.numberLines'}
+summarise(FINAL_DATA_NA_REMOVE, Dataset = "Extended Energy Balances", TotalNumberOfRows = n())
+```
+
+* Output the total number of records for each product across countries across years
+
+```{r message=FALSE, warning=FALSE, attr.source='.numberLines'}
+FINAL_DATA_NA_REMOVE %>%
+  group_by(Product = product) %>%
+  summarise(NumberOfRows = n())
+```
