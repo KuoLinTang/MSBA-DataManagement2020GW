@@ -43,6 +43,8 @@ When a guest pays his or her bill — or a portion of his or her bill — a line
     
 • Additional SQL Queries and Business Goals will be considered as a plus but will not exclude the attenuation of a full mark.
 
+---
+
 ## Part B: Semi-Structured Data (Files)
 
 The data folder is available on the my.WBS homepage and is exported from OECD. It provides a table of extended energy balances of OECD countries and each folder contains an excel file that its contents look like this:
@@ -55,6 +57,8 @@ Your goal is to use your R knowledge from the lectures and provide a dataset tha
 
 The combination of country, year and flow and product should be unique, suggesting that there is only one particular value for that particular combination of the other 3 columns. You will have to provide a complete outline of the R code along with the output for each stage (Rmarkdown run). You also need to provide the total number of records on the dataset and the total number of records for each product across countries across years.
 
+---
+
 ## Part C: Semi-Structured Data (Web)
 
 The UK Food Standards Agency runs the food hygiene rating scheme which aims to evaluate the standards of food hygiene found on the date of the inspection in a restaurant serving food by the local authority.
@@ -63,6 +67,8 @@ The UK government provides an open API in either JSON or XML to download the dat
 https://www.food.gov.uk/uk-food-hygiene-rating-data-api
 
 Your job is to write an R script to fetch the ratings dataset from the government website and store it in a format that will enable further analysis. The resulting data frame should capture all XML defined fields from the website. You need to document and articulate every stage in your code and explain your steps clearly.
+
+---
 
 ## Part D: Dashboard with R/Shiny
 
