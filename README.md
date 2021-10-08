@@ -1,4 +1,4 @@
-# Data Management Group Assignment (MSBA 2020/21)
+# Data Management Group Project (MSBA 2020/21)
 
 ## Part A: Structured Data
 ### Scenario
