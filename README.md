@@ -34,11 +34,11 @@ When a guest pays his or her bill — or a portion of his or her bill — a line
 
 • A set of scenarios where SQL queries that satisfy business goals are provided. The following need to be included:
 
-    o The total spent for the customer for a particular stay (checkout invoice). <br/>
-    o The most valuable customers in (a) the last two months, (b) past year and (c) from the beginning of the records. <br/>
-    o Which are the top countries where our customers come from ? <br/>
-    o How much did the hotel pay in referral fees for each of the platforms that we have contracted with? <br/>
-    o What is the utilization rate for each hotel (that is the average billable days of a hotel specified as the average utilization of room bookings for the last 12 months) <br/>
+    o The total spent for the customer for a particular stay (checkout invoice).
+    o The most valuable customers in (a) the last two months, (b) past year and (c) from the beginning of the records.
+    o Which are the top countries where our customers come from ?
+    o How much did the hotel pay in referral fees for each of the platforms that we have contracted with?
+    o What is the utilization rate for each hotel (that is the average billable days of a hotel specified as the average utilization of room bookings for the last 12 months)
     o Calculate the Customer Value in terms of total spent for each customer before the current booking.
     
 • Additional SQL Queries and Business Goals will be considered as a plus but will not exclude the attenuation of a full mark.
